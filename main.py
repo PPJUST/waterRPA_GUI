@@ -1,21 +1,20 @@
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from instruct_function import *
+from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
-from instruct_line_widgets import  *
 
 """
 定义常量
 """
 code_command_dict = {'': '',
-                     '单击左键':'widget_command_pic',
-                     '双击左键':'widget_command_pic',
-                     '单击右键':'widget_command_pic',
-                     '输入文本':'widget_command_input',
-                     '等待':'widget_command_wait',
-                     '滚动滚轮':'widget_command_scroll',
-                     '热键':'widget_command_hotkey',
-                     '自定义命令':'widget_command_custom'}  # 第一个元素留空，用于初始显示
+                     '单击左键': 'widget_command_pic',
+                     '双击左键': 'widget_command_pic',
+                     '单击右键': 'widget_command_pic',
+                     '输入文本': 'widget_command_input',
+                     '等待时间': 'widget_command_wait',
+                     '等待时间(随机)': 'widget_command_wait',
+                     '滚动滚轮': 'widget_command_scroll',
+                     '模拟按键': 'widget_command_hotkey',
+                     '自定义命令': 'widget_command_custom'}  # 第一个元素留空，用于初始显示
 
 
 class Main(QMainWindow):
@@ -29,16 +28,17 @@ class Main(QMainWindow):
         """
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
-
+        self.insert_instruct_line_widgets()  # 生成一个初始控件组
+        pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
 
         """
         连接信号与槽函数
         """
+        # 配置文件区
 
-        self.insert_instruct_line_widgets()
-        self.insert_instruct_line_widgets()
-        self.insert_instruct_line_widgets()
-        self.insert_instruct_line_widgets()
+        # 功能区
+        self.ui.pushButton_start.clicked.connect(self.start_instruct)
+        self.ui.pushButton_stop.clicked.connect(self.stop_instruct)
 
     def insert_instruct_line_widgets(self):
         """插入指令行控件组
@@ -52,10 +52,10 @@ class Main(QMainWindow):
         # 在当前索引后插入新的控件组
         widget_instruct = widget_instruct_line()
         list_widget_item = QListWidgetItem()
-        list_widget_item.setSizeHint(widget_instruct.sizeHint()*2)  # 设置列表项的大小
+        list_widget_item.setSizeHint(widget_instruct.sizeHint() * 2)  # 设置列表项的大小
         list_widget_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)  # 启用列表项的拖放支持
-        self.ui.listWidget_instruct_area.insertItem(index +1,list_widget_item)
-        self.ui.listWidget_instruct_area.setItemWidget(list_widget_item,widget_instruct)
+        self.ui.listWidget_instruct_area.insertItem(index + 1, list_widget_item)
+        self.ui.listWidget_instruct_area.setItemWidget(list_widget_item, widget_instruct)
 
         # 设置内部控件属性
         widget_instruct.comboBox_select_command.addItems(code_command_dict)
@@ -82,10 +82,54 @@ class Main(QMainWindow):
         index = self.get_index_of_current_widgets(self.sender())
         self.ui.listWidget_instruct_area.takeItem(index)
 
+    def start_instruct(self):
+        """执行指令"""
+        total_command_number = self.ui.listWidget_instruct_area.count()
 
+        for i in range(total_command_number):
+            item = self.ui.listWidget_instruct_area.item(i)
+            item_widget = self.ui.listWidget_instruct_area.itemWidget(item)
+            command_type = item_widget.comboBox_select_command.currentText()
+            command_widget = item_widget.widget_command_setting.layout().itemAt(0).widget()
+            print(command_widget)
+            # 备忘录 后期优化
+            time.sleep(0.1)  # 每个指令键暂停0.1秒
+            if command_type == '单击左键':
+                click_time = 1
+                l_or_r_click = 'left'
+                pic_file = command_widget.label_show_pic.text()
+                instruct_pic_click(click_time, l_or_r_click, pic_file)
+            elif command_type == '双击左键':
+                click_time = 2
+                l_or_r_click = 'left'
+                pic_file = command_widget.label_show_pic.text()
+                instruct_pic_click(click_time, l_or_r_click, pic_file)
+            elif command_type == '单击右键':
+                click_time = 1
+                l_or_r_click = 'right'
+                pic_file = command_widget.label_show_pic.text()
+                instruct_pic_click(click_time, l_or_r_click, pic_file)
+            elif command_type == '输入文本':
+                text = command_widget.lineEdit_input.text()
+                instruct_input(text)
+            elif command_type == '等待时间':
+                wait_time = command_widget.doubleSpinBox_wait_second.value()
+                instruct_wait(wait_time)
+            elif command_type == '等待时间(随机)':
+                pass
+            elif command_type == '滚动滚轮':
+                direction = command_widget.comboBox_scroll_direction.currentText()
+                distance = command_widget.spinBox_scroll_distance.value()
+                instruct_scroll(direction, distance)
+            elif command_type == '模拟按键':
+                hotkey_str = command_widget.lineEdit_hotkey.text()
+                instruct_hotkey(hotkey_str)
+            elif command_type == '自定义命令':
+                pass
 
-
-
+    def stop_instruct(self):
+        """中止指令"""
+        pyautogui.moveTo(0, 0)
 
 
 def main():
