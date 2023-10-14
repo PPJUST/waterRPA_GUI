@@ -70,7 +70,7 @@ class Main(QMainWindow):
         self.ui.listWidget_instruct_area.insertItem(index + 1, list_widget_item)
         self.ui.listWidget_instruct_area.setItemWidget(list_widget_item, widget_instruct)
 
-        # 设置内部控件属性
+        # 设置comboBox的选项
         widget_instruct.comboBox_select_command.addItems(code_command_dict)
         # 设置状态label的图标
         pixmap = QPixmap(icon_edit)

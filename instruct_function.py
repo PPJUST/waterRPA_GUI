@@ -96,10 +96,10 @@ def mouse_up(x: int, y: int, button: str = 'left'):
     pyautogui.mouseUp(x, y, button=button)
 
 
-def mouse_scroll(x: int, y: int, clicks: int):
+def mouse_scroll(x: int, y: int, distance: int):
     """在指定位置滚动滚轮
     clicks 为滚动格数，正数向上滚动，负数向下滚动"""
-    pyautogui.scroll(clicks=clicks, x=x, y=y)
+    pyautogui.scroll(clicks=distance, x=x, y=y)
 
 
 """
