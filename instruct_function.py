@@ -5,13 +5,13 @@ import pyautogui
 import pyperclip
 
 
-def instruct_pic_click(click_time, l_or_r_click, pic_file):
-    """图片点击指令"""
-    location = pyautogui.locateCenterOnScreen(pic_file, confidence=0.9)
-    if location is not None:
-        pyautogui.click(location.x, location.y, clicks=click_time, interval=0.2, duration=0.2, button=l_or_r_click)
+def instruct_pic_click(click_time, click_button, pic_file, duration=0.25):
+    """图片点击指令（两个函数的封装）"""
+    x, y = search_pic_first_position(pic_file)
+    if x:
+        mouse_click(x, y, button=click_button, clicks=click_time, duration=duration)
     else:
-        print("未找到匹配图片")
+        print("无匹配项")
 
 
 def instruct_input(text):
@@ -68,19 +68,20 @@ def move_mouse_to_position(x: int, y: int, duration: float = 0.25):
     pyautogui.moveTo(x, y, duration=duration)
 
 
-def drag_mouse_to_position(x: int, y: int, button: str = 'left', duration: int = 0.25):
+def drag_mouse_to_position(x: int, y: int, button: str = 'left', duration: float = 0.25):
     """按下鼠标键，拖拽至指定坐标轴
     button 为指定键，可设置为"left", "middle", right"
     duration 为移动所需时间，0为瞬间移动"""
     pyautogui.dragTo(x, y, button=button, duration=duration)
 
 
-def mouse_click(x: int, y: int, button: str = 'left', clicks: int = 1, interval: float = 0.1):
+def mouse_click(x: int, y: int, button: str = 'left', clicks: int = 1, interval: float = 0.1, duration: float = 0.25):
     """在指定位置点击鼠标
     button 为点击的按键，可设置为"left", "middle", right
     clicks 为点击次数
-    interval 为点击间隔时间"""
-    pyautogui.click(x, y, button=button, clicks=clicks, interval=interval)
+    interval 为点击间隔时间
+    duration 为移动所需时间，0为瞬间移动"""
+    pyautogui.click(x, y, button=button, clicks=clicks, interval=interval, duration=duration)
 
 
 def mouse_down(x: int, y: int, button: str = 'left'):

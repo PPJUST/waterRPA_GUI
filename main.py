@@ -12,6 +12,11 @@ from ui_main import Ui_MainWindow
 """
 定义常量
 """
+icon_edit = r'icon/edit.png'
+icon_error = r'icon/error.png'
+icon_right = r'icon/right.png'
+
+
 code_command_dict = {'': '',
                      '单击左键': 'widget_command_pic',
                      '双击左键': 'widget_command_pic',
@@ -67,6 +72,14 @@ class Main(QMainWindow):
 
         # 设置内部控件属性
         widget_instruct.comboBox_select_command.addItems(code_command_dict)
+        # 设置状态label的图标
+        pixmap = QPixmap(icon_edit)
+        resize = calculate_resize(widget_instruct.label_state.size(), pixmap.size())
+        pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
+        widget_instruct.label_state.setPixmap(pixmap)
+
+
+
 
         # 内部控件连接槽函数
         widget_instruct.toolButton_add_instruct.clicked.connect(self.insert_instruct_line_widgets)
