@@ -1,6 +1,13 @@
+import os
+
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
+
+
+# 备忘录 各种指令用画表的方法统一格式，使得只需要修改一处地方代码就可以统一全部方案
+
+
 
 """
 定义常量
@@ -15,7 +22,7 @@ code_command_dict = {'': '',
                      '滚动滚轮': 'widget_command_scroll',
                      '模拟按键': 'widget_command_hotkey',
                      '自定义命令': 'widget_command_custom'}  # 第一个元素留空，用于初始显示
-
+# 备忘录 修改文本描述 区分鼠标、键盘、图像操作
 
 class Main(QMainWindow):
     def __init__(self):
@@ -26,6 +33,7 @@ class Main(QMainWindow):
         """
         初始化
         """
+        self.check_default_config()
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
         self.insert_instruct_line_widgets()  # 生成一个初始控件组
@@ -79,8 +87,13 @@ class Main(QMainWindow):
 
     def delete_instruct_line_widgets(self):
         """删除当前控件组"""
+        if self.ui.listWidget_instruct_area.count() == 1:  # 如果删除的是最后一个控件组，则先新增一个空白的再删除
+            self.insert_instruct_line_widgets()
+
         index = self.get_index_of_current_widgets(self.sender())
         self.ui.listWidget_instruct_area.takeItem(index)
+
+
 
     def start_instruct(self):
         """执行指令"""
@@ -97,17 +110,18 @@ class Main(QMainWindow):
             if command_type == '单击左键':
                 click_time = 1
                 l_or_r_click = 'left'
-                pic_file = command_widget.label_show_pic.text()
+                pic_file = command_widget.label_show_pic.property('pic_path')  # 图片的路径存放在property中
                 instruct_pic_click(click_time, l_or_r_click, pic_file)
             elif command_type == '双击左键':
                 click_time = 2
                 l_or_r_click = 'left'
-                pic_file = command_widget.label_show_pic.text()
+                pic_file = command_widget.label_show_pic.property('pic_path')
+                print(pic_file)
                 instruct_pic_click(click_time, l_or_r_click, pic_file)
             elif command_type == '单击右键':
                 click_time = 1
                 l_or_r_click = 'right'
-                pic_file = command_widget.label_show_pic.text()
+                pic_file = command_widget.label_show_pic.property('pic_path')
                 instruct_pic_click(click_time, l_or_r_click, pic_file)
             elif command_type == '输入文本':
                 text = command_widget.lineEdit_input.text()
@@ -131,13 +145,21 @@ class Main(QMainWindow):
         """中止指令"""
         pyautogui.moveTo(0, 0)
 
+    def check_default_config(self):
+        """检查初始配置文件"""
+        if not os.path.exists('config') or not os.listdir('config'):
+            os.makedirs('config/默认')
+            with open('config/默认/setting.ini', 'w', encoding='utf-8') as sw:
+                setting = """[DEFAULT]
+loop_time = 1"""
+                sw.write(setting)
+
 
 def main():
     app = QApplication()
     app.setStyle('Fusion')
     show_ui = Main()
     show_ui.setWindowIcon(QIcon('./icon/main.ico'))
-    # show_ui.setFixedSize(262, 232)
     show_ui.show()
     app.exec_()
 

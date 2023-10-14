@@ -9,7 +9,7 @@ class FrameSelectWidget(QWidget):
     发送信号：signal_frame_area(list) 截取区域信号，[开始x轴, 开始y轴, 结束x轴, 结束y轴]
     """
     signal_frame_area = Signal(list)  # 截取区域信号，[开始x轴, 开始y轴, 结束x轴, 结束y轴]
-
+    signal_frame_right_click = Signal()  # 截取时按下右键的信号
 
     def __init__(self):
         super().__init__()
@@ -24,8 +24,8 @@ class FrameSelectWidget(QWidget):
             self.state_is_selecting = True
             self.start_pos = event.pos()
             self.end_pos = event.pos()
-        if event.button() == Qt.RightButton:  # 右键按下的操作
-            pass
+        elif event.button() == Qt.RightButton:  # 右键按下的操作
+            self.signal_frame_right_click.emit()
 
     def mouseMoveEvent(self, event):
         if self.state_is_selecting:
@@ -93,6 +93,7 @@ class QDialogScreenshot(QDialog):
         layout.setSpacing(0)
         widget = FrameSelectWidget()
         widget.signal_frame_area.connect(self.get_signal_frame)
+        widget.signal_frame_right_click.connect(self.close)
         layout.addWidget(widget)
 
 

@@ -72,6 +72,18 @@ def calculate_resize(qsize_label: QSize, qsize_pic: QSize) -> QSize:
 
     return resize
 
+def create_random_string(length: int):
+    """生成一个指定长度的随机字符串（小写英文+数字）
+    传参：length 字符串的长度
+    返回值：生成的str"""
+    import string
+    import random
+
+    characters = string.ascii_lowercase + string.digits
+    random_string = ''.join(random.choices(characters, k=length))
+
+    return random_string
+
 
 class widget_instruct_line(QWidget):
     """整个指令控件组"""
@@ -82,6 +94,12 @@ class widget_instruct_line(QWidget):
         self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
+
+
+        self.label_state = QLabel()
+        self.label_state.setObjectName(u"label_state")
+        self.label_state.setText('状态')
+        self.horizontalLayout.addWidget(self.label_state)
 
         self.toolButton_add_instruct = QToolButton()
         self.toolButton_add_instruct.setObjectName(u"toolButton_add_instruct")
@@ -105,6 +123,8 @@ class widget_instruct_line(QWidget):
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.addWidget(self.widget_command_setting)
+
+        self.horizontalLayout.setStretch(4, 1)
 
         # 连接槽函数
         self.comboBox_select_command.currentTextChanged.connect(self.select_command)
@@ -153,10 +173,11 @@ class widget_command_pic(QWidget):
 
     def choose_pic(self, pic_file=None):
         """弹出文件对话框选择图片"""
-        if pic_file is None:
+        if not pic_file:
             pic_file, _ = QFileDialog.getOpenFileName(self, "选择图片", "./", "图片文件(*.png *.jpg *.bmp)")
+
         if pic_file:
-            self.label_show_pic.setText(pic_file)
+            self.label_show_pic.setProperty('pic_path', pic_file)
             pixmap = QPixmap(pic_file)
             resize = calculate_resize(self.label_show_pic.size(), pixmap.size())
             pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
@@ -180,7 +201,8 @@ class widget_command_pic(QWidget):
 
         format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
         print(f'截图区域 {format_area}')
-        save_pic_file = r'region_screenshot.png'
+
+        save_pic_file = f'config/{create_random_string(16)}.png'
         pyautogui.screenshot(save_pic_file, region=format_area)
         self.choose_pic(save_pic_file)
 
@@ -295,7 +317,7 @@ class DropLabel(QLabel):
         if urls:
             path = urls[0].toLocalFile()  # 获取路径
             if os.path.isfile(path) and filetype.is_image(path):
-                self.setText(path)
+                self.setProperty('pic_path', path)
                 pixmap = QPixmap(path)
                 resize = calculate_resize(self.size(), pixmap.size())
                 pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
