@@ -185,9 +185,12 @@ class WidgetInstructLine(QWidget):
 
 
 class command_widget_move_mouse_to_position(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label = QLabel()
@@ -222,15 +225,57 @@ class command_widget_move_mouse_to_position(QWidget):
         self.label_4.setText(')')
         self.horizontalLayout.addWidget(self.label_4)
 
-    def check_arg(self):
-        """检查参数"""
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = self.doubleSpinBox_duration.value()
+
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration}
+
+        self.signal_args.emit(args_dict)
 
 
 
 class command_widget_drag_mouse_to_position(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label = QLabel()
@@ -273,11 +318,58 @@ class command_widget_drag_mouse_to_position(QWidget):
         self.label_5.setText(') 释放')
         self.horizontalLayout.addWidget(self.label_5)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_button.currentTextChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = self.doubleSpinBox_duration.value()
+        button = self.comboBox_button.currentText()
+
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration,
+                     'button':button}
+
+        self.signal_args.emit(args_dict)
 
 class command_widget_mouse_click(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -336,11 +428,64 @@ class command_widget_mouse_click(QWidget):
         self.label_7.setText('秒')
         self.horizontalLayout.addWidget(self.label_7)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_button.currentTextChanged.connect(self.send_args)
+        self.doubleSpinBox_interval.valueChanged.connect(self.send_args)
+        self.spinBox_clicks.valueChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = self.doubleSpinBox_duration.value()
+        button = self.comboBox_button.currentText()
+        interval = self.doubleSpinBox_interval.value()
+        clicks = self.spinBox_clicks.value()
+
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration,
+                     'button':button,
+                     'interval':interval,
+                     'clicks':clicks}
+
+        self.signal_args.emit(args_dict)
 
 class command_widget_mouse_down(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -383,11 +528,59 @@ class command_widget_mouse_down(QWidget):
         self.label_6.setText('不释放')
         self.horizontalLayout.addWidget(self.label_6)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_button.currentTextChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = self.doubleSpinBox_duration.value()
+        button = self.comboBox_button.currentText()
+
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration,
+                     'button':button}
+
+        self.signal_args.emit(args_dict)
+
 
 class command_widget_mouse_up(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -425,6 +618,51 @@ class command_widget_mouse_up(QWidget):
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
         self.horizontalLayout.addWidget(self.comboBox_button)
+
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_button.currentTextChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = self.doubleSpinBox_duration.value()
+        button = self.comboBox_button.currentText()
+
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration,
+                     'button': button}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_mouse_scroll(QWidget):
@@ -661,9 +899,12 @@ class command_widget_press_keys(QWidget):
 
 
 class command_widget_press_hotkey(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -678,11 +919,53 @@ class command_widget_press_hotkey(QWidget):
         self.label_3.setText('热键')
         self.horizontalLayout.addWidget(self.label_3)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_hotkeys.textChanged.connect(self.check_args)
+
+        self.lineEdit_hotkeys.textChanged.connect(self.send_args)
+
+
+    def check_args(self):
+        """检查参数规范"""
+        keys_split = self.lineEdit_hotkeys.text().split(" ")
+        wrong_key = [key for key in keys_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
+        if wrong_key:
+            self.right_args = False
+            self.lineEdit_hotkeys.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.lineEdit_hotkeys.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        keys_split = self.lineEdit_hotkeys.text().split(" ")
+        hotkeys = [key for key in keys_split if key.lower() in pyautogui_keyboard_keys]
+
+
+        args_dict = {'right_args': right_args,
+                     'hotkeys': hotkeys}
+
+        self.signal_args.emit(args_dict)
+
 
 class command_widget_press_down_key(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -697,11 +980,51 @@ class command_widget_press_down_key(QWidget):
         self.label_3.setText('键（不释放，但不会重复输入文本）')
         self.horizontalLayout.addWidget(self.label_3)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_key.textChanged.connect(self.check_args)
+
+        self.lineEdit_key.textChanged.connect(self.send_args)
+
+
+    def check_args(self):
+        """检查参数规范"""
+        key = self.lineEdit_key.text().strip()
+        if key.lower() not in pyautogui_keyboard_keys:
+            self.right_args = False
+            self.lineEdit_key.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.lineEdit_key.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        key = self.lineEdit_key.text().strip()
+
+
+        args_dict = {'right_args': right_args,
+                     'key': key}
+
+        self.signal_args.emit(args_dict)
+
 
 class command_widget_press_up_key(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -715,6 +1038,41 @@ class command_widget_press_up_key(QWidget):
         self.label_3 = QLabel()
         self.label_3.setText('键')
         self.horizontalLayout.addWidget(self.label_3)
+
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_key.textChanged.connect(self.check_args)
+
+        self.lineEdit_key.textChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        key = self.lineEdit_key.text().strip()
+        if key.lower() not in pyautogui_keyboard_keys:
+            self.right_args = False
+            self.lineEdit_key.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.lineEdit_key.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        key = self.lineEdit_key.text().strip()
+
+        args_dict = {'right_args': right_args,
+                     'key': key}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_screenshot_fullscreen(QWidget):
@@ -1044,7 +1402,7 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = command_widget_press_keys()
+    test = command_widget_screenshot_fullscreen()
     # -------------
     layout = QVBoxLayout()
     layout.addWidget(test)

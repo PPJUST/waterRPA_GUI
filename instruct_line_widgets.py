@@ -149,38 +149,3 @@ class widget_command_pic(QWidget):
 
     # 备忘录 如果是勾选图片的话，后期修改图片路径为本地复制一份
 
-
-
-
-
-
-
-
-
-
-class widget_command_hotkey(QWidget):
-    """模拟按键指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_7 = QHBoxLayout(self)
-
-        self.lineEdit_hotkey = QLineEdit(self)
-        self.lineEdit_hotkey.setObjectName(u"lineEdit_hotkey")
-        self.lineEdit_hotkey.setPlaceholderText("多个热键用【空格】隔开，效果为同时按下")
-        self.horizontalLayout_7.addWidget(self.lineEdit_hotkey)
-
-        # 连接槽函数
-        self.lineEdit_hotkey.textChanged.connect(self.text_changed)
-
-    def text_changed(self):
-        hotkey_split = self.lineEdit_hotkey.text().split(" ")
-        wrong_key = [key for key in hotkey_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
-        if wrong_key:
-            self.lineEdit_hotkey.setStyleSheet("background: yellow;")  # 设置为黄色背景，提示用
-        else:
-            self.lineEdit_hotkey.setStyleSheet("")
-
-
-
-
