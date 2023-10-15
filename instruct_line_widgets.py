@@ -85,65 +85,6 @@ def create_random_string(length: int):
     return random_string
 
 
-class widget_instruct_line(QWidget):
-    """整个指令控件组"""
-
-    def __init__(self):
-        super().__init__()
-        # 初始化
-        self.horizontalLayout = QHBoxLayout(self)
-        self.horizontalLayout.setSpacing(3)
-        self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
-
-
-        self.label_state = QLabel()
-        self.label_state.setObjectName(u"label_state")
-        self.label_state.setText('状态')
-        self.horizontalLayout.addWidget(self.label_state)
-
-        self.toolButton_add_instruct = QToolButton()
-        self.toolButton_add_instruct.setObjectName(u"toolButton_add_instruct")
-        self.toolButton_add_instruct.setText('+')
-        self.horizontalLayout.addWidget(self.toolButton_add_instruct)
-
-        self.toolButton_delete_instruct = QToolButton()
-        self.toolButton_delete_instruct.setObjectName(u"toolButton_delete_instruct")
-        self.toolButton_delete_instruct.setText('-')
-        self.horizontalLayout.addWidget(self.toolButton_delete_instruct)
-
-        self.comboBox_select_command = QComboBox()
-        self.comboBox_select_command.setObjectName(u"comboBox_select_command")
-        self.comboBox_select_command.setMinimumWidth(80)
-        self.comboBox_select_command.setMaximumWidth(80)
-        self.horizontalLayout.addWidget(self.comboBox_select_command)
-
-        self.widget_command_setting = QWidget()
-        self.widget_command_setting.setObjectName(u"widget_command_setting")
-        self.horizontalLayout_2 = QHBoxLayout(self.widget_command_setting)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.addWidget(self.widget_command_setting)
-
-        self.horizontalLayout.setStretch(4, 1)
-
-        # 连接槽函数
-        self.comboBox_select_command.currentTextChanged.connect(self.select_command)
-
-    def select_command(self, command: str):
-        """选择命令"""
-        value_widget = eval(f'{code_command_dict[command]}()')  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
-        layout = self.widget_command_setting.layout()  # 获取对应控件组中用于存放不同命令控件的控件的布局
-
-        while layout.count():  # 先清空布局中的原有控件
-            item = layout.takeAt(0)
-            widget = item.widget()
-            if widget:
-                widget.deleteLater()
-
-        if value_widget:
-            layout.addWidget(value_widget)
-
-
 class widget_command_pic(QWidget):
     """单击、双击、右键的图片指令设置"""
 
@@ -209,55 +150,12 @@ class widget_command_pic(QWidget):
     # 备忘录 如果是勾选图片的话，后期修改图片路径为本地复制一份
 
 
-class widget_command_input(QWidget):
-    """输入指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_4 = QHBoxLayout(self)
-
-        self.lineEdit_input = QLineEdit()
-        self.lineEdit_input.setObjectName(u"lineEdit_input")
-        self.lineEdit_input.setPlaceholderText("输入文本")
-        self.horizontalLayout_4.addWidget(self.lineEdit_input)
 
 
-class widget_command_wait(QWidget):
-    """等待指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_5 = QHBoxLayout(self)
-
-        self.doubleSpinBox_wait_second = QDoubleSpinBox()
-        self.doubleSpinBox_wait_second.setObjectName(u"doubleSpinBox_wait_second")
-        self.doubleSpinBox_wait_second.setMaximum(9999)
-        self.horizontalLayout_5.addWidget(self.doubleSpinBox_wait_second)
-
-        self.label = QLabel()
-        self.label.setObjectName(u"label")
-        self.label.setText('秒')
-        self.horizontalLayout_5.addWidget(self.label)
 
 
-class widget_command_scroll(QWidget):
-    """滚轮指令设置"""
 
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_6 = QHBoxLayout(self)
 
-        self.comboBox_scroll_direction = QComboBox()
-        self.comboBox_scroll_direction.addItem("向上")
-        self.comboBox_scroll_direction.addItem("向下")
-        self.comboBox_scroll_direction.setObjectName(u"comboBox_scroll_direction")
-        self.horizontalLayout_6.addWidget(self.comboBox_scroll_direction)
-
-        self.spinBox_scroll_distance = QSpinBox()
-        self.spinBox_scroll_distance.setObjectName(u"spinBox_scroll_distance")
-        self.spinBox_scroll_distance.setMaximum(10000)
-        self.spinBox_scroll_distance.setSingleStep(10)
-        self.horizontalLayout_6.addWidget(self.spinBox_scroll_distance)
 
 
 class widget_command_hotkey(QWidget):
@@ -284,66 +182,5 @@ class widget_command_hotkey(QWidget):
             self.lineEdit_hotkey.setStyleSheet("")
 
 
-class widget_command_custom(QWidget):
-    """自定义指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_8 = QHBoxLayout(self)
-
-        self.comboBox_custom_command = QComboBox()
-        self.comboBox_custom_command.setObjectName(u"comboBox_custom_command")
-        self.horizontalLayout_8.addWidget(self.comboBox_custom_command)
 
 
-class DropLabel(QLabel):
-    """自定义QLabel控件
-    拖入图片文件到QLabel中，将QLabel的文本设置为【拖入的图片文件路径】，并且在QLabel上显示该图片
-    并发送信号 signal_QLabel_dropped(str)
-    注意：仅支持单个图片文件路径"""
-
-    signal_QLabel_dropped = Signal(str)  # 发送获取的文件夹路径str信号
-
-    def __init__(self):
-        super().__init__()
-        self.setAcceptDrops(True)  # 设置可拖入
-
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-
-    def dropEvent(self, event: QDropEvent):
-        urls = event.mimeData().urls()
-        if urls:
-            path = urls[0].toLocalFile()  # 获取路径
-            if os.path.isfile(path) and filetype.is_image(path):
-                self.setProperty('pic_path', path)
-                pixmap = QPixmap(path)
-                resize = calculate_resize(self.size(), pixmap.size())
-                pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
-                self.setPixmap(pixmap)
-                self.signal_QLabel_dropped.emit(path)
-
-
-def _test_widget():
-    # 测试显示效果
-    from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout
-
-    app = QApplication([])
-    window = QWidget()
-
-    # --------------
-    test = widget_command_custom()
-    # -------------
-
-    layout = QVBoxLayout()
-    layout.addWidget(test)
-
-    window.setLayout(layout)
-
-    window.show()
-    app.exec_()
-
-
-if __name__ == "__main__":
-    _test_widget()

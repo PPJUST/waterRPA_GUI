@@ -1,8 +1,8 @@
+"""pyautogui的封装"""
 import time
 from typing import Tuple, Union
 
 import pyautogui
-import pyperclip
 
 
 

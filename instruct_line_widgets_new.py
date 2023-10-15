@@ -2,6 +2,7 @@
 单个控件组内部的操作都在该模块实现
 """
 import os
+import random
 
 import filetype
 import pyautogui
@@ -44,11 +45,44 @@ pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', 
                            'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command',
                            'option', 'optionleft', 'optionright']
 
-default_duration:float = 0.25  # 移动所需时间
-default_presses:int = 1  # 重复次数
-default_clicks:int = 1  # 点击次数
-default_interval:float = 0.1  # 每次点击间隔时间
+default_duration: float = 0.25  # 默认移动所需时间
+max_duration: float = 9999.99  # 移动所需时间的最大值限制
+default_presses: int = 1  # 默认重复次数
+default_clicks: int = 1  # 默认点击次数
+max_clicks: int = 9  # 点击次数的最大值限制
+default_interval: float = 0.1  # 默认每次点击间隔时间
+max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
+max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
+default_wait_time = 1  # 默认等待时间
 
+
+class DropLabel(QLabel):
+    """自定义QLabel控件
+    拖入图片文件到QLabel中，将QLabel的文本设置为【拖入的图片文件路径】，并且在QLabel上显示该图片
+    并发送信号 signal_QLabel_dropped(str)
+    注意：仅支持单个图片文件路径"""
+
+    signal_QLabel_dropped = Signal(str)  # 发送获取的文件夹路径str信号
+
+    def __init__(self):
+        super().__init__()
+        self.setAcceptDrops(True)  # 设置可拖入
+
+    def dragEnterEvent(self, event: QDragEnterEvent):
+        if event.mimeData().hasUrls():
+            event.acceptProposedAction()
+
+    def dropEvent(self, event: QDropEvent):
+        urls = event.mimeData().urls()
+        if urls:
+            path = urls[0].toLocalFile()  # 获取路径
+            if os.path.isfile(path) and filetype.is_image(path):
+                self.setProperty('pic_path', path)
+                pixmap = QPixmap(path)
+                resize = calculate_resize(self.size(), pixmap.size())
+                pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
+                self.setPixmap(pixmap)
+                self.signal_QLabel_dropped.emit(path)
 
 
 def calculate_resize(qsize_label: QSize, qsize_pic: QSize) -> QSize:
@@ -101,7 +135,6 @@ class WidgetInstructLine(QWidget):
         self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
-
 
         self.label_state = QLabel()
         self.label_state.setObjectName(u"label_state")
@@ -163,7 +196,7 @@ class command_widget_move_mouse_to_position(QWidget):
 
         self.doubleSpinBox_duration = QDoubleSpinBox()
         self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(9999.99)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
         self.doubleSpinBox_duration.setValue(default_duration)
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
@@ -173,7 +206,7 @@ class command_widget_move_mouse_to_position(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_3 = QLabel()
@@ -182,13 +215,15 @@ class command_widget_move_mouse_to_position(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_4 = QLabel()
         self.label_4.setText(')')
         self.horizontalLayout.addWidget(self.label_4)
 
+    def check_arg(self):
+        """检查参数"""
 
 
 
@@ -203,7 +238,7 @@ class command_widget_drag_mouse_to_position(QWidget):
         self.horizontalLayout.addWidget(self.label)
 
         self.comboBox_button = QComboBox()
-        self.comboBox_button.addItems(['左键','右键','中键'])
+        self.comboBox_button.addItems(['左键', '右键', '中键'])
         self.horizontalLayout.addWidget(self.comboBox_button)
 
         self.label_2 = QLabel()
@@ -212,7 +247,7 @@ class command_widget_drag_mouse_to_position(QWidget):
 
         self.doubleSpinBox_duration = QDoubleSpinBox()
         self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(9999.99)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
         self.doubleSpinBox_duration.setValue(default_duration)
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
@@ -222,7 +257,7 @@ class command_widget_drag_mouse_to_position(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_4 = QLabel()
@@ -231,13 +266,12 @@ class command_widget_drag_mouse_to_position(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_5 = QLabel()
         self.label_5.setText(') 释放')
         self.horizontalLayout.addWidget(self.label_5)
-
 
 
 class command_widget_mouse_click(QWidget):
@@ -252,7 +286,7 @@ class command_widget_mouse_click(QWidget):
 
         self.doubleSpinBox_duration = QDoubleSpinBox()
         self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(9999.99)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
         self.doubleSpinBox_duration.setValue(default_duration)
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
@@ -262,7 +296,7 @@ class command_widget_mouse_click(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_4 = QLabel()
@@ -271,7 +305,7 @@ class command_widget_mouse_click(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_5 = QLabel()
@@ -285,7 +319,7 @@ class command_widget_mouse_click(QWidget):
         self.spinBox_clicks = QSpinBox()
         self.spinBox_clicks.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_clicks.setValue(default_clicks)
-        self.spinBox_clicks.setMaximum(9)
+        self.spinBox_clicks.setMaximum(max_clicks)
         self.horizontalLayout.addWidget(self.spinBox_clicks)
 
         self.label_6 = QLabel()
@@ -294,15 +328,13 @@ class command_widget_mouse_click(QWidget):
 
         self.doubleSpinBox_interval = QDoubleSpinBox()
         self.doubleSpinBox_interval.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_interval.setMaximum(9999.99)
+        self.doubleSpinBox_interval.setMaximum(max_interval)
         self.doubleSpinBox_interval.setValue(default_interval)
         self.horizontalLayout.addWidget(self.doubleSpinBox_interval)
 
         self.label_7 = QLabel()
         self.label_7.setText('秒')
         self.horizontalLayout.addWidget(self.label_7)
-
-
 
 
 class command_widget_mouse_down(QWidget):
@@ -317,7 +349,7 @@ class command_widget_mouse_down(QWidget):
 
         self.doubleSpinBox_duration = QDoubleSpinBox()
         self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(9999.99)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
         self.doubleSpinBox_duration.setValue(default_duration)
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
@@ -327,7 +359,7 @@ class command_widget_mouse_down(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_4 = QLabel()
@@ -336,7 +368,7 @@ class command_widget_mouse_down(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_5 = QLabel()
@@ -364,7 +396,7 @@ class command_widget_mouse_up(QWidget):
 
         self.doubleSpinBox_duration = QDoubleSpinBox()
         self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(9999.99)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
         self.doubleSpinBox_duration.setValue(default_duration)
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
@@ -374,7 +406,7 @@ class command_widget_mouse_up(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_4 = QLabel()
@@ -383,7 +415,7 @@ class command_widget_mouse_up(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_5 = QLabel()
@@ -395,14 +427,14 @@ class command_widget_mouse_up(QWidget):
         self.horizontalLayout.addWidget(self.comboBox_button)
 
 
-
-
-
-
 class command_widget_mouse_scroll(QWidget):
+    signal_args = Signal(dict)
 
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -411,7 +443,7 @@ class command_widget_mouse_scroll(QWidget):
 
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(9999)
+        self.spinBox_x.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_3 = QLabel()
@@ -420,7 +452,7 @@ class command_widget_mouse_scroll(QWidget):
 
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(9999)
+        self.spinBox_y.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_4 = QLabel()
@@ -428,29 +460,74 @@ class command_widget_mouse_scroll(QWidget):
         self.horizontalLayout.addWidget(self.label_4)
 
         self.comboBox_scroll_direction = QComboBox()
-        self.comboBox_scroll_direction.addItems(['向上','向下'])
+        self.comboBox_scroll_direction.addItems(['向上', '向下'])
         self.horizontalLayout.addWidget(self.comboBox_scroll_direction)
 
         self.label_5 = QLabel()
         self.label_5.setText('滚动')
         self.horizontalLayout.addWidget(self.label_5)
 
-        self.spinBox = QSpinBox()
-        self.spinBox.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox.setMaximum(9999)
-        self.horizontalLayout.addWidget(self.spinBox)
+        self.spinBox_scroll_distance = QSpinBox()
+        self.spinBox_scroll_distance.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_scroll_distance.setMaximum(9999)
+        self.horizontalLayout.addWidget(self.spinBox_scroll_distance)
 
         self.label_6 = QLabel()
         self.label_6.setText('像素距离')
         self.horizontalLayout.addWidget(self.label_6)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
 
+
+        """
+        槽函数设置
+        """
+        self.spinBox_x.valueChanged.connect(self.check_args)
+        self.spinBox_y.valueChanged.connect(self.check_args)
+
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
+        self.comboBox_scroll_direction.currentTextChanged.connect(self.send_args)
+        self.spinBox_scroll_distance.valueChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
+            self.right_args = False
+            self.spinBox_x.setStyleSheet('border: 1px solid red;')
+            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.spinBox_x.setStyleSheet('')
+            self.spinBox_y.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
+        duration = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText()=='向上' else -self.spinBox_scroll_distance.value()
+
+        args_dict = {'right_args':right_args,
+                     'x':x,
+                     'y':y,
+                     'duration':duration}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_press_text(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -467,7 +544,7 @@ class command_widget_press_text(QWidget):
 
         self.doubleSpinBox_interval = QDoubleSpinBox()
         self.doubleSpinBox_interval.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_interval.setMaximum(9999.99)
+        self.doubleSpinBox_interval.setMaximum(max_interval)
         self.doubleSpinBox_interval.setValue(default_interval)
         self.horizontalLayout.addWidget(self.doubleSpinBox_interval)
 
@@ -475,11 +552,37 @@ class command_widget_press_text(QWidget):
         self.label_4.setText('秒')
         self.horizontalLayout.addWidget(self.label_4)
 
+        """
+        初始化
+        """
+        self.right_args=True
+        self.send_args()
+
+        """"
+        槽函数设置
+        """
+        self.lineEdit_message.textChanged.connect(self.send_args)
+        self.doubleSpinBox_interval.valueChanged.connect(self.send_args)
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        message= self.lineEdit_message.text()
+        interval = self.doubleSpinBox_interval.value()
+
+        args_dict = {'right_args': right_args,
+                     'message': message,
+                     'interval': interval}
+
+        self.signal_args.emit(args_dict)
 
 class command_widget_press_keys(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -504,7 +607,7 @@ class command_widget_press_keys(QWidget):
 
         self.doubleSpinBox_interval = QDoubleSpinBox()
         self.doubleSpinBox_interval.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_interval.setMaximum(9999.99)
+        self.doubleSpinBox_interval.setMaximum(max_interval)
         self.doubleSpinBox_interval.setValue(default_interval)
         self.horizontalLayout.addWidget(self.doubleSpinBox_interval)
 
@@ -512,8 +615,49 @@ class command_widget_press_keys(QWidget):
         self.label_5.setText('秒')
         self.horizontalLayout.addWidget(self.label_5)
 
+        """
+        初始化
+        """
+        self.right_args=False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_keys.textChanged.connect(self.check_args)
+
+        self.lineEdit_keys.textChanged.connect(self.send_args)
+        self.spinBox_presses.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_interval.valueChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        keys_split = self.lineEdit_keys.text().split(" ")
+        wrong_key = [key for key in keys_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
+        if wrong_key:
+            self.right_args = False
+            self.lineEdit_keys.setStyleSheet('border: 1px solid red;')
+        else:
+            self.right_args = True
+            self.lineEdit_keys.setStyleSheet('')
 
 
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        keys_split = self.lineEdit_keys.text().split(" ")
+        keys = [key for key in keys_split if key.lower() in pyautogui_keyboard_keys]
+
+        presses = self.spinBox_presses.value()
+        interval = self.doubleSpinBox_interval.value()
+
+        args_dict = {'right_args':right_args,
+                     'presses':presses,
+                     'interval':interval}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_press_hotkey(QWidget):
@@ -533,8 +677,6 @@ class command_widget_press_hotkey(QWidget):
         self.label_3 = QLabel()
         self.label_3.setText('热键')
         self.horizontalLayout.addWidget(self.label_3)
-
-
 
 
 class command_widget_press_down_key(QWidget):
@@ -590,7 +732,6 @@ class command_widget_screenshot_fullscreen(QWidget):
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
 
 
-
 class command_widget_screenshot_area(QWidget):
 
     def __init__(self):
@@ -603,7 +744,7 @@ class command_widget_screenshot_area(QWidget):
 
         self.spinBox_xl = QSpinBox()
         self.spinBox_xl.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_xl.setMaximum(9999)
+        self.spinBox_xl.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_xl)
 
         self.label_3 = QLabel()
@@ -612,7 +753,7 @@ class command_widget_screenshot_area(QWidget):
 
         self.spinBox_yl = QSpinBox()
         self.spinBox_yl.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_yl.setMaximum(9999)
+        self.spinBox_yl.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_yl)
 
         self.label_4 = QLabel()
@@ -621,7 +762,7 @@ class command_widget_screenshot_area(QWidget):
 
         self.spinBox_xr = QSpinBox()
         self.spinBox_xr.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_xr.setMaximum(9999)
+        self.spinBox_xr.setMaximum(max_x)
         self.horizontalLayout.addWidget(self.spinBox_xr)
 
         self.label_5 = QLabel()
@@ -630,7 +771,7 @@ class command_widget_screenshot_area(QWidget):
 
         self.spinBox_yr = QSpinBox()
         self.spinBox_yr.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_yr.setMaximum(9999)
+        self.spinBox_yr.setMaximum(max_y)
         self.horizontalLayout.addWidget(self.spinBox_yr)
 
         self.label_6 = QLabel()
@@ -642,28 +783,165 @@ class command_widget_screenshot_area(QWidget):
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
 
 
-
-
-
 class command_widget_move_to_pic_position(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.horizontalLayout = QHBoxLayout(self)
 
+        self.label = QLabel()
+        self.label.setText('匹配图片')
+        self.horizontalLayout.addWidget(self.label)
 
+        self.label_show_pic = DropLabel()
+        self.label_show_pic.setText('拖入图片')
+        self.label_show_pic.setFrameShape(QFrame.Box)
+        self.label_show_pic.setFrameShadow(QFrame.Sunken)
+        self.horizontalLayout.addWidget(self.label_show_pic)
+
+        self.label_2 = QLabel()
+        self.label_2.setText('，分别使用')
+        self.horizontalLayout.addWidget(self.label_2)
+
+        self.doubleSpinBox_duration = QDoubleSpinBox()
+        self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
+        self.doubleSpinBox_duration.setValue(default_duration)
+        self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
+
+        self.label_3 = QLabel()
+        self.label_3.setText('秒移动鼠标至')
+        self.horizontalLayout.addWidget(self.label_3)
+
+        self.comboBox_find_model = QComboBox()
+        self.comboBox_find_model.addItems(['第一个', '全部'])
+        self.horizontalLayout.addWidget(self.comboBox_find_model)
+
+        self.label_4 = QLabel()
+        self.label_4.setText('匹配位置')
+        self.horizontalLayout.addWidget(self.label_4)
+
+        self.line = QFrame()
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout.addWidget(self.line)
+
+        self.toolButton_choose_pic = QToolButton()
+        self.toolButton_choose_pic.setText('选图')
+        self.horizontalLayout.addWidget(self.toolButton_choose_pic)
+
+        self.toolButton_screenshot = QToolButton()
+        self.toolButton_screenshot.setText('截图')
+        self.horizontalLayout.addWidget(self.toolButton_screenshot)
 
 
 class command_widget_click_pic_position(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.horizontalLayout_top = QHBoxLayout(self)
+        self.horizontalLayout_top.setSpacing(5)
+        self.horizontalLayout_top.setContentsMargins(0, 0, 0, 0)
 
+        # 第1列布局
+        self.horizontalLayout_line1 = QHBoxLayout()
+
+        self.label = QLabel()
+        self.label.setText('匹配图片')
+        self.horizontalLayout_line1.addWidget(self.label)
+
+        self.label_show_pic = DropLabel()
+        self.label_show_pic.setText('拖入图片')
+        self.label_show_pic.setFrameShape(QFrame.Box)
+        self.label_show_pic.setFrameShadow(QFrame.Sunken)
+        self.horizontalLayout_line1.addWidget(self.label_show_pic)
+
+        self.label_2 = QLabel()
+        self.label_2.setText('，分别使用')
+        self.horizontalLayout_line1.addWidget(self.label_2)
+
+        self.doubleSpinBox_duration = QDoubleSpinBox()
+        self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_duration.setMaximum(max_duration)
+        self.doubleSpinBox_duration.setValue(default_duration)
+        self.horizontalLayout_line1.addWidget(self.doubleSpinBox_duration)
+
+        self.label_3 = QLabel()
+        self.label_3.setText('秒移动鼠标至')
+        self.horizontalLayout_line1.addWidget(self.label_3)
+
+        self.comboBox_find_model = QComboBox()
+        self.comboBox_find_model.addItems(['第一个', '全部'])
+        self.horizontalLayout_line1.addWidget(self.comboBox_find_model)
+
+        self.label_4 = QLabel()
+        self.label_4.setText('匹配位置，')
+        self.horizontalLayout_line1.addWidget(self.label_4)
+
+        # 第2列布局
+        self.horizontalLayout_line2 = QHBoxLayout()
+
+        self.label_5 = QLabel()
+        self.label_5.setText('并点击')
+        self.horizontalLayout_line2.addWidget(self.label_5)
+
+        self.comboBox_button = QComboBox()
+        self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.horizontalLayout_line2.addWidget(self.comboBox_button)
+
+        self.spinBox_clicks = QSpinBox()
+        self.spinBox_clicks.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_clicks.setValue(default_clicks)
+        self.spinBox_clicks.setMaximum(max_clicks)
+        self.horizontalLayout_line2.addWidget(self.spinBox_clicks)
+
+        self.label_6 = QLabel()
+        self.label_6.setText('次，点击间隔时间')
+        self.horizontalLayout_line2.addWidget(self.label_6)
+
+        self.doubleSpinBox_interval = QDoubleSpinBox()
+        self.doubleSpinBox_interval.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_interval.setMaximum(max_interval)
+        self.doubleSpinBox_interval.setValue(default_interval)
+        self.horizontalLayout_line2.addWidget(self.doubleSpinBox_interval)
+
+        self.label_7 = QLabel()
+        self.label_7.setText('秒')
+        self.horizontalLayout_line2.addWidget(self.label_7)
+
+        # 右侧按钮布局
+        self.horizontalLayout_button = QHBoxLayout()
+
+        self.line = QFrame()
+        self.line.setFrameShape(QFrame.VLine)
+        self.line.setFrameShadow(QFrame.Plain)
+        self.horizontalLayout_button.addWidget(self.line)
+
+        self.toolButton_choose_pic = QToolButton()
+        self.toolButton_choose_pic.setText('选图')
+        self.horizontalLayout_button.addWidget(self.toolButton_choose_pic)
+
+        self.toolButton_screenshot = QToolButton()
+        self.toolButton_screenshot.setText('截图')
+        self.horizontalLayout_button.addWidget(self.toolButton_screenshot)
+
+        # 合并两列布局
+        self.verticalLayout_line = QVBoxLayout()
+        self.verticalLayout_line.addLayout(self.horizontalLayout_line1)
+        self.verticalLayout_line.addLayout(self.horizontalLayout_line2)
+
+        # 组合全部布局
+        self.horizontalLayout_top.addLayout(self.verticalLayout_line)
+        self.horizontalLayout_top.addLayout(self.horizontalLayout_button)
 
 
 class command_widget_wait(QWidget):
-
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -673,225 +951,104 @@ class command_widget_wait(QWidget):
         self.doubleSpinBox_wait_time = QDoubleSpinBox()
         self.doubleSpinBox_wait_time.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.doubleSpinBox_wait_time.setMaximum(9999.99)
-        self.doubleSpinBox_wait_time.setValue(default_interval)
+        self.doubleSpinBox_wait_time.setValue(default_wait_time)
         self.horizontalLayout.addWidget(self.doubleSpinBox_wait_time)
 
         self.label_3 = QLabel()
         self.label_3.setText('秒')
         self.horizontalLayout.addWidget(self.label_3)
 
+        """
+        初始化
+        """
+        self.right_args = True
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.doubleSpinBox_wait_time.valueChanged.connect(self.send_args)
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+        wait_time = self.doubleSpinBox_wait_time.value()
+
+        args_dict = {'right_args': right_args,
+                     'wait_time':wait_time}
+
+        self.signal_args.emit(args_dict)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-class widget_command_pic(QWidget):
-    """单击、双击、右键的图片指令设置"""
-
+class command_widget_wait_random(QWidget):
+    signal_args = Signal(dict)
     def __init__(self):
         super().__init__()
-        # 初始化
-        self.horizontalLayout_3 = QHBoxLayout(self)
-
-        self.label_show_pic = DropLabel()
-        self.label_show_pic.setObjectName(u"label_show_pic")
-        self.label_show_pic.setText('显示图片')
-        self.horizontalLayout_3.addWidget(self.label_show_pic)
-
-        self.toolButton_choose_pic = QToolButton()
-        self.toolButton_choose_pic.setObjectName(u"toolButton_choose_pic")
-        self.toolButton_choose_pic.setText('选择')
-        self.horizontalLayout_3.addWidget(self.toolButton_choose_pic)
-
-        self.toolButton_screenshot = QToolButton()
-        self.toolButton_screenshot.setObjectName(u"toolButton_screenshot")
-        self.toolButton_screenshot.setText('截图')
-        self.horizontalLayout_3.addWidget(self.toolButton_screenshot)
-
-        # 连接槽函数
-        self.toolButton_choose_pic.clicked.connect(self.choose_pic)
-        self.toolButton_screenshot.clicked.connect(self.screenshot)
-
-    def choose_pic(self, pic_file=None):
-        """弹出文件对话框选择图片"""
-        if not pic_file:
-            pic_file, _ = QFileDialog.getOpenFileName(self, "选择图片", "./", "图片文件(*.png *.jpg *.bmp)")
-
-        if pic_file:
-            self.label_show_pic.setProperty('pic_path', pic_file)
-            pixmap = QPixmap(pic_file)
-            resize = calculate_resize(self.label_show_pic.size(), pixmap.size())
-            pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
-            self.label_show_pic.setPixmap(pixmap)
-
-    def screenshot(self):
-        """截屏"""
-        print(self.sender().parentWidget())
-        dialog = qdialog_screenshot.QDialogScreenshot()
-        dialog.signal_screenshot_area.connect(dialog.close)  # 先关闭dialog再进行截图，防止将遮罩也截入
-        dialog.signal_screenshot_area.connect(self.get_screenshot_area)
-        dialog.exec_()
-
-    def get_screenshot_area(self, screenshot_area: list):
-        """获取截屏区域的信号"""
-        x_start, y_start, x_end, y_end = screenshot_area
-        if x_start > x_end:  # pyautogui的截图只支持正数，所以需要调换
-            x_start, x_end = x_end, x_start
-        if y_start > y_end:  # pyautogui的截图只支持正数，所以需要调换
-            y_start, y_end = y_end, y_start
-
-        format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
-        print(f'截图区域 {format_area}')
-
-        save_pic_file = f'config/{create_random_string(16)}.png'
-        pyautogui.screenshot(save_pic_file, region=format_area)
-        self.choose_pic(save_pic_file)
-
-    # 备忘录 如果是勾选图片的话，后期修改图片路径为本地复制一份
-
-
-class widget_command_input(QWidget):
-    """输入指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_4 = QHBoxLayout(self)
-
-        self.lineEdit_input = QLineEdit()
-        self.lineEdit_input.setObjectName(u"lineEdit_input")
-        self.lineEdit_input.setPlaceholderText("输入文本")
-        self.horizontalLayout_4.addWidget(self.lineEdit_input)
-
-
-class widget_command_wait(QWidget):
-    """等待指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_5 = QHBoxLayout(self)
-
-        self.doubleSpinBox_wait_second = QDoubleSpinBox()
-        self.doubleSpinBox_wait_second.setObjectName(u"doubleSpinBox_wait_second")
-        self.doubleSpinBox_wait_second.setMaximum(9999)
-        self.horizontalLayout_5.addWidget(self.doubleSpinBox_wait_second)
+        """
+        ui设置
+        """
+        self.horizontalLayout = QHBoxLayout(self)
 
         self.label = QLabel()
-        self.label.setObjectName(u"label")
-        self.label.setText('秒')
-        self.horizontalLayout_5.addWidget(self.label)
+        self.label.setText('等待（区间内随机数） 最小值')
+        self.horizontalLayout.addWidget(self.label)
 
+        self.doubleSpinBox_wait_time_min = QDoubleSpinBox()
+        self.doubleSpinBox_wait_time_min.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_wait_time_min.setMaximum(9999.99)
+        self.doubleSpinBox_wait_time_min.setValue(default_wait_time)
+        self.horizontalLayout.addWidget(self.doubleSpinBox_wait_time_min)
 
-class widget_command_scroll(QWidget):
-    """滚轮指令设置"""
+        self.label_2 = QLabel()
+        self.label_2.setText('秒~最大值')
+        self.horizontalLayout.addWidget(self.label_2)
 
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_6 = QHBoxLayout(self)
+        self.doubleSpinBox_wait_time_max = QDoubleSpinBox()
+        self.doubleSpinBox_wait_time_max.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_wait_time_max.setMaximum(9999.99)
+        self.doubleSpinBox_wait_time_max.setValue(default_wait_time)
+        self.horizontalLayout.addWidget(self.doubleSpinBox_wait_time_max)
 
-        self.comboBox_scroll_direction = QComboBox()
-        self.comboBox_scroll_direction.addItem("向上")
-        self.comboBox_scroll_direction.addItem("向下")
-        self.comboBox_scroll_direction.setObjectName(u"comboBox_scroll_direction")
-        self.horizontalLayout_6.addWidget(self.comboBox_scroll_direction)
+        self.label_3 = QLabel()
+        self.label_3.setText('秒')
+        self.horizontalLayout.addWidget(self.label_3)
 
-        self.spinBox_scroll_distance = QSpinBox()
-        self.spinBox_scroll_distance.setObjectName(u"spinBox_scroll_distance")
-        self.spinBox_scroll_distance.setMaximum(10000)
-        self.spinBox_scroll_distance.setSingleStep(10)
-        self.horizontalLayout_6.addWidget(self.spinBox_scroll_distance)
+        """
+        初始化
+        """
+        self.right_args=True
+        self.send_args()
 
+        """
+        槽函数设置
+        """
+        self.doubleSpinBox_wait_time_min.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_wait_time_max.valueChanged.connect(self.send_args)
 
-class widget_command_hotkey(QWidget):
-    """模拟按键指令设置"""
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
 
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_7 = QHBoxLayout(self)
+        wait_time_min = self.doubleSpinBox_wait_time_min.value()
+        wait_time_max = self.doubleSpinBox_wait_time_max.value()
+        wait_time_random = round(random.uniform(wait_time_min, wait_time_max),2)
 
-        self.lineEdit_hotkey = QLineEdit(self)
-        self.lineEdit_hotkey.setObjectName(u"lineEdit_hotkey")
-        self.lineEdit_hotkey.setPlaceholderText("多个热键用【空格】隔开，效果为同时按下")
-        self.horizontalLayout_7.addWidget(self.lineEdit_hotkey)
+        args_dict = {'right_args': right_args,
+                     'wait_time': wait_time_random}
 
-        # 连接槽函数
-        self.lineEdit_hotkey.textChanged.connect(self.text_changed)
-
-    def text_changed(self):
-        hotkey_split = self.lineEdit_hotkey.text().split(" ")
-        wrong_key = [key for key in hotkey_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
-        if wrong_key:
-            self.lineEdit_hotkey.setStyleSheet("background: yellow;")  # 设置为黄色背景，提示用
-        else:
-            self.lineEdit_hotkey.setStyleSheet("")
-
-
-class widget_command_custom(QWidget):
-    """自定义指令设置"""
-
-    def __init__(self):
-        super().__init__()
-        self.horizontalLayout_8 = QHBoxLayout(self)
-
-        self.comboBox_custom_command = QComboBox()
-        self.comboBox_custom_command.setObjectName(u"comboBox_custom_command")
-        self.horizontalLayout_8.addWidget(self.comboBox_custom_command)
-
-
-class DropLabel(QLabel):
-    """自定义QLabel控件
-    拖入图片文件到QLabel中，将QLabel的文本设置为【拖入的图片文件路径】，并且在QLabel上显示该图片
-    并发送信号 signal_QLabel_dropped(str)
-    注意：仅支持单个图片文件路径"""
-
-    signal_QLabel_dropped = Signal(str)  # 发送获取的文件夹路径str信号
-
-    def __init__(self):
-        super().__init__()
-        self.setAcceptDrops(True)  # 设置可拖入
-
-    def dragEnterEvent(self, event: QDragEnterEvent):
-        if event.mimeData().hasUrls():
-            event.acceptProposedAction()
-
-    def dropEvent(self, event: QDropEvent):
-        urls = event.mimeData().urls()
-        if urls:
-            path = urls[0].toLocalFile()  # 获取路径
-            if os.path.isfile(path) and filetype.is_image(path):
-                self.setProperty('pic_path', path)
-                pixmap = QPixmap(path)
-                resize = calculate_resize(self.size(), pixmap.size())
-                pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
-                self.setPixmap(pixmap)
-                self.signal_QLabel_dropped.emit(path)
+        self.signal_args.emit(args_dict)
 
 
 def _test_widget():
     # 测试显示效果
-    from PySide2.QtWidgets import QApplication, QWidget, QVBoxLayout
-
     app = QApplication([])
     window = QWidget()
-
     # --------------
-    test = command_widget_screenshot_area()
+    test = command_widget_press_keys()
     # -------------
-
     layout = QVBoxLayout()
     layout.addWidget(test)
-
     window.setLayout(layout)
-
     window.show()
     app.exec_()
 
