@@ -3,6 +3,7 @@ import os
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
+import configparser
 
 
 # 备忘录 各种指令用画表的方法统一格式，使得只需要修改一处地方代码就可以统一全部方案
@@ -28,17 +29,17 @@ class Main(QMainWindow):
         """
         初始化
         """
+        self.instruct_setting = dict()  # 存放各个命令行的参数设置，格式为{命令行id:{args_dict数据},...}
         self.check_default_config()
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
         self.insert_instruct_line_widgets()  # 生成一个初始控件组
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
-
-        self.instruct_setting = dict()  # 存放各个命令行的参数设置，格式为{命令行id:{args_dict数据},...}
         """
         连接信号与槽函数
         """
         # 配置文件区
+        self.ui.toolButton_save_config.clicked.connect(self.save_config)
 
         # 功能区
         self.ui.pushButton_start.clicked.connect(self.start_instruct)
@@ -47,6 +48,14 @@ class Main(QMainWindow):
     def get_args(self,args_dict):
         instruct_id = self.sender().property('id')
         self.instruct_setting[instruct_id] = args_dict
+
+        # 是否启用执行按钮
+        self.ui.pushButton_start.setEnabled(True)
+        for i_dict in self.instruct_setting.values():
+            if i_dict:  # 不考虑空的键值对
+                right_args = i_dict['right_args']
+                if not right_args:
+                    self.ui.pushButton_start.setEnabled(False)
 
     def insert_instruct_line_widgets(self):
         """插入指令行控件组
@@ -59,7 +68,9 @@ class Main(QMainWindow):
 
         # 在当前索引后插入新的控件组
         widget_instruct = WidgetInstructLine()
-        widget_instruct.setProperty('id', create_random_string(16))  # 设置命令行控件组的唯一id
+        id_random = create_random_string(16)
+        widget_instruct.setProperty('id', id_random)  # 设置命令行控件组的唯一id
+        self.instruct_setting[id_random]={}  # 创建对应的空键值对
         list_widget_item = QListWidgetItem()
         list_widget_item.setSizeHint(widget_instruct.sizeHint() * 2)  # 设置列表项的大小
         list_widget_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)  # 启用列表项的拖放支持
@@ -105,6 +116,9 @@ class Main(QMainWindow):
 
     def start_instruct(self):
         """执行指令"""
+        self.ui.pushButton_start.setEnabled(False)
+        self.ui.pushButton_stop.setEnabled(True)
+
         total_command_number = self.ui.listWidget_instruct_area.count()
 
         for i in range(total_command_number):
@@ -119,18 +133,26 @@ class Main(QMainWindow):
             for key in instruct_data:
                 value = instruct_data[key]
                 if type(value) is str:
+                    convert = {'左键':'left', '右键':'right','中键':'middle'}  # 转换为pyautogui支持的文本
+                    if value in convert:
+                        value = convert[value]
                     exec(f"{key}='{value}'")
                 else:
                     exec(f'{key}={value}')
-                print((f'{key}={value}'))
 
             # 调用对应函数，相关变量已使用exec创建
             exec(f'{instruct_funciton}')
+
+        self.ui.pushButton_start.setEnabled(True)
+        self.ui.pushButton_stop.setEnabled(False)
 
 
 
     def stop_instruct(self):
         """中止指令"""
+        self.ui.pushButton_start.setEnabled(True)
+        self.ui.pushButton_stop.setEnabled(False)
+
         pyautogui.moveTo(0, 0)
 
     def check_default_config(self):
@@ -141,6 +163,30 @@ class Main(QMainWindow):
                 setting = """[DEFAULT]
 loop_time = 1"""
                 sw.write(setting)
+
+    def save_config(self):
+        """保存配置寄文件"""
+        config = configparser.ConfigParser()
+        config.read("config.ini", encoding='utf-8')  # 配置文件的路径
+        config.clear()  # 清除全部内容
+
+        total_command_number = self.ui.listWidget_instruct_area.count()
+
+        for i in range(total_command_number):
+            item = self.ui.listWidget_instruct_area.item(i)
+            instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
+            command_type = instruct_widget.comboBox_select_command.currentText()  # 获取指令中文名
+            instruct_id = instruct_widget.property('id')  # 获取控件组id
+            instruct_data = self.instruct_setting[instruct_id]  # 根据id获取参数str
+
+            config.add_section(str(i))
+            config.set(str(i),'command_type',command_type)
+
+            for key in instruct_data:
+                config.set(str(i), str(key), str(instruct_data[key]))
+
+        config.write(open('config.ini', 'w', encoding='utf-8'))
+
 
 
 def main():

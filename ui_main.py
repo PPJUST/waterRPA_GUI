@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'ui_maincVdiot.ui'
+## Form generated from reading UI file 'ui_mainBZLeqC.ui'
 ##
 ## Created by: Qt User Interface Compiler version 5.15.2
 ##
@@ -17,29 +17,17 @@ class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         if not MainWindow.objectName():
             MainWindow.setObjectName(u"MainWindow")
-        MainWindow.resize(683, 501)
+        MainWindow.resize(748, 699)
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
-        self.horizontalLayout_3 = QHBoxLayout(self.centralwidget)
-        self.horizontalLayout_3.setSpacing(6)
+        self.verticalLayout_5 = QVBoxLayout(self.centralwidget)
+        self.verticalLayout_5.setSpacing(3)
+        self.verticalLayout_5.setObjectName(u"verticalLayout_5")
+        self.verticalLayout_5.setContentsMargins(3, 3, 3, 3)
+        self.horizontalLayout_3 = QHBoxLayout()
         self.horizontalLayout_3.setObjectName(u"horizontalLayout_3")
-        self.horizontalLayout_3.setContentsMargins(3, 3, 3, 3)
-        self.groupBox_instruct = QGroupBox(self.centralwidget)
-        self.groupBox_instruct.setObjectName(u"groupBox_instruct")
-        self.verticalLayout_2 = QVBoxLayout(self.groupBox_instruct)
-        self.verticalLayout_2.setSpacing(0)
-        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
-        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.listWidget_instruct_area = QListWidget(self.groupBox_instruct)
-        self.listWidget_instruct_area.setObjectName(u"listWidget_instruct_area")
-
-        self.verticalLayout_2.addWidget(self.listWidget_instruct_area)
-
-
-        self.horizontalLayout_3.addWidget(self.groupBox_instruct)
-
-        self.verticalLayout_3 = QVBoxLayout()
-        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
+        self.verticalLayout_4 = QVBoxLayout()
+        self.verticalLayout_4.setObjectName(u"verticalLayout_4")
         self.groupBox_config = QGroupBox(self.centralwidget)
         self.groupBox_config.setObjectName(u"groupBox_config")
         self.horizontalLayout_2 = QHBoxLayout(self.groupBox_config)
@@ -49,6 +37,11 @@ class Ui_MainWindow(object):
         self.comboBox_select_config.setObjectName(u"comboBox_select_config")
 
         self.horizontalLayout_2.addWidget(self.comboBox_select_config)
+
+        self.toolButton_save_config = QToolButton(self.groupBox_config)
+        self.toolButton_save_config.setObjectName(u"toolButton_save_config")
+
+        self.horizontalLayout_2.addWidget(self.toolButton_save_config)
 
         self.toolButton_add_config = QToolButton(self.groupBox_config)
         self.toolButton_add_config.setObjectName(u"toolButton_add_config")
@@ -61,14 +54,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_2.addWidget(self.toolButton_delete_config)
 
 
-        self.verticalLayout_3.addWidget(self.groupBox_config)
-
-        self.line = QFrame(self.centralwidget)
-        self.line.setObjectName(u"line")
-        self.line.setFrameShape(QFrame.HLine)
-        self.line.setFrameShadow(QFrame.Sunken)
-
-        self.verticalLayout_3.addWidget(self.line)
+        self.verticalLayout_4.addWidget(self.groupBox_config)
 
         self.groupBox_function = QGroupBox(self.centralwidget)
         self.groupBox_function.setObjectName(u"groupBox_function")
@@ -93,23 +79,21 @@ class Ui_MainWindow(object):
 
         self.pushButton_start = QPushButton(self.groupBox_function)
         self.pushButton_start.setObjectName(u"pushButton_start")
+        self.pushButton_start.setEnabled(False)
 
         self.gridLayout.addWidget(self.pushButton_start, 0, 0, 1, 1)
 
         self.pushButton_stop = QPushButton(self.groupBox_function)
         self.pushButton_stop.setObjectName(u"pushButton_stop")
+        self.pushButton_stop.setEnabled(False)
 
         self.gridLayout.addWidget(self.pushButton_stop, 0, 1, 1, 1)
 
 
-        self.verticalLayout_3.addWidget(self.groupBox_function)
+        self.verticalLayout_4.addWidget(self.groupBox_function)
 
-        self.line_2 = QFrame(self.centralwidget)
-        self.line_2.setObjectName(u"line_2")
-        self.line_2.setFrameShape(QFrame.HLine)
-        self.line_2.setFrameShadow(QFrame.Sunken)
 
-        self.verticalLayout_3.addWidget(self.line_2)
+        self.horizontalLayout_3.addLayout(self.verticalLayout_4)
 
         self.groupBox_info = QGroupBox(self.centralwidget)
         self.groupBox_info.setObjectName(u"groupBox_info")
@@ -123,16 +107,36 @@ class Ui_MainWindow(object):
         self.verticalLayout.addWidget(self.label_2)
 
 
-        self.verticalLayout_3.addWidget(self.groupBox_info)
+        self.horizontalLayout_3.addWidget(self.groupBox_info)
 
-        self.verticalLayout_3.setStretch(4, 1)
+        self.groupBox_setting = QGroupBox(self.centralwidget)
+        self.groupBox_setting.setObjectName(u"groupBox_setting")
+        self.verticalLayout_3 = QVBoxLayout(self.groupBox_setting)
+        self.verticalLayout_3.setObjectName(u"verticalLayout_3")
 
-        self.horizontalLayout_3.addLayout(self.verticalLayout_3)
+        self.horizontalLayout_3.addWidget(self.groupBox_setting)
+
+
+        self.verticalLayout_5.addLayout(self.horizontalLayout_3)
+
+        self.groupBox_instruct = QGroupBox(self.centralwidget)
+        self.groupBox_instruct.setObjectName(u"groupBox_instruct")
+        self.verticalLayout_2 = QVBoxLayout(self.groupBox_instruct)
+        self.verticalLayout_2.setSpacing(0)
+        self.verticalLayout_2.setObjectName(u"verticalLayout_2")
+        self.verticalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.listWidget_instruct_area = QListWidget(self.groupBox_instruct)
+        self.listWidget_instruct_area.setObjectName(u"listWidget_instruct_area")
+
+        self.verticalLayout_2.addWidget(self.listWidget_instruct_area)
+
+
+        self.verticalLayout_5.addWidget(self.groupBox_instruct)
 
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 683, 23))
+        self.menubar.setGeometry(QRect(0, 0, 748, 23))
         MainWindow.setMenuBar(self.menubar)
 
         self.retranslateUi(MainWindow)
@@ -142,15 +146,17 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"waterRPA GUI\u7248", None))
-        self.groupBox_instruct.setTitle(QCoreApplication.translate("MainWindow", u"\u6307\u4ee4\u533a", None))
         self.groupBox_config.setTitle(QCoreApplication.translate("MainWindow", u"\u914d\u7f6e\u6587\u4ef6", None))
+        self.toolButton_save_config.setText(QCoreApplication.translate("MainWindow", u"\u4fdd\u5b58", None))
         self.toolButton_add_config.setText(QCoreApplication.translate("MainWindow", u"+", None))
         self.toolButton_delete_config.setText(QCoreApplication.translate("MainWindow", u"-", None))
-        self.groupBox_function.setTitle(QCoreApplication.translate("MainWindow", u"\u529f\u80fd\u533a", None))
-        self.label.setText(QCoreApplication.translate("MainWindow", u"\u5faa\u73af\u6b21\u6570", None))
+        self.groupBox_function.setTitle(QCoreApplication.translate("MainWindow", u"\u529f\u80fd", None))
+        self.label.setText(QCoreApplication.translate("MainWindow", u"\u8fd0\u884c\u6b21\u6570", None))
         self.pushButton_start.setText(QCoreApplication.translate("MainWindow", u"\u6267\u884c", None))
         self.pushButton_stop.setText(QCoreApplication.translate("MainWindow", u"\u505c\u6b62", None))
         self.groupBox_info.setTitle(QCoreApplication.translate("MainWindow", u"\u8bf4\u660e", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u7b80\u5355\u8bf4\u660e", None))
+        self.groupBox_setting.setTitle(QCoreApplication.translate("MainWindow", u"\u5168\u5c40\u8bbe\u7f6e", None))
+        self.groupBox_instruct.setTitle(QCoreApplication.translate("MainWindow", u"\u6307\u4ee4\u533a", None))
     # retranslateUi
 
