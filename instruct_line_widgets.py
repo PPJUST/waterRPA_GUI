@@ -15,16 +15,33 @@ import qdialog_screenshot
 """
 定义常量
 """
-code_command_dict = {'': '',
-                     '单击左键': 'widget_command_pic',
-                     '双击左键': 'widget_command_pic',
-                     '单击右键': 'widget_command_pic',
-                     '输入文本': 'widget_command_input',
-                     '等待时间': 'widget_command_wait',
-                     '等待时间(随机)': 'widget_command_wait',
-                     '滚动滚轮': 'widget_command_scroll',
-                     '模拟按键': 'widget_command_hotkey',
-                     '自定义命令': 'widget_command_custom'}  # 第一个元素留空，用于初始显示
+# 对应字典设计 combox项:{function:对应函数, widget:对应控件}
+# 第一个元素留空，用于初始显示
+code_command_dict = {'': {'function': '', 'widget': ''},
+                     '鼠标操作-移动': {'function': 'move_mouse_to_position',
+                                       'widget': 'command_widget_move_mouse_to_position'},
+                     '鼠标操作-按下并拖拽': {'function': 'drag_mouse_to_position',
+                                             'widget': 'command_widget_drag_mouse_to_position'},
+                     '鼠标操作-点击': {'function': 'mouse_click', 'widget': 'command_widget_mouse_click'},
+                     '鼠标操作-按下(不释放)': {'function': 'mouse_down', 'widget': 'command_widget_mouse_down'},
+                     '鼠标操作-释放': {'function': 'mouse_up', 'widget': 'command_widget_mouse_up'},
+                     '鼠标操作-滚动滚轮': {'function': 'mouse_scroll', 'widget': 'command_widget_mouse_scroll'},
+                     '键盘操作-输入文本': {'function': 'press_text', 'widget': 'command_widget_press_text'},
+                     '键盘操作-敲击': {'function': 'press_keys', 'widget': 'command_widget_press_keys'},
+                     '键盘操作-使用热键': {'function': 'press_hotkey', 'widget': 'command_widget_press_hotkey'},
+                     '键盘操作-按下(不释放)': {'function': 'press_down_key', 'widget': 'command_widget_press_down_key'},
+                     '键盘操作-释放': {'function': 'press_up_key', 'widget': 'command_widget_press_up_key'},
+                     '图像操作-全屏截图': {'function': 'screenshot_fullscreen',
+                                           'widget': 'command_widget_screenshot_fullscreen'},
+                     '图像操作-区域截图': {'function': 'screenshot_area', 'widget': 'command_widget_screenshot_area'},
+                     '图像操作-匹配图片并移动': {'function': 'move_to_pic_position',
+                                                 'widget': 'command_widget_move_to_pic_position'},
+                     '图像操作-匹配图片并点击': {'function': 'click_pic_position',
+                                                 'widget': 'command_widget_click_pic_position'},
+                     '其他-等待时间': {'function': 'wait', 'widget': 'command_widget_wait'},
+                     '其他-等待时间（区间随机）': {'function': 'wait', 'widget': 'command_widget_wait_random'}}
+
+
 
 pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.',
                            '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@',
@@ -157,28 +174,24 @@ class WidgetInstructLine(QWidget):
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
 
         self.label_state = QLabel()
-        self.label_state.setObjectName(u"label_state")
         self.label_state.setText('状态')
         self.horizontalLayout.addWidget(self.label_state)
 
         self.toolButton_add_instruct = QToolButton()
-        self.toolButton_add_instruct.setObjectName(u"toolButton_add_instruct")
         self.toolButton_add_instruct.setText('+')
         self.horizontalLayout.addWidget(self.toolButton_add_instruct)
 
         self.toolButton_delete_instruct = QToolButton()
-        self.toolButton_delete_instruct.setObjectName(u"toolButton_delete_instruct")
         self.toolButton_delete_instruct.setText('-')
         self.horizontalLayout.addWidget(self.toolButton_delete_instruct)
 
         self.comboBox_select_command = QComboBox()
-        self.comboBox_select_command.setObjectName(u"comboBox_select_command")
+        self.comboBox_select_command.addItems(list(code_command_dict.keys()))
         self.comboBox_select_command.setMinimumWidth(80)
         self.comboBox_select_command.setMaximumWidth(80)
         self.horizontalLayout.addWidget(self.comboBox_select_command)
 
         self.widget_command_setting = QWidget()
-        self.widget_command_setting.setObjectName(u"widget_command_setting")
         self.horizontalLayout_2 = QHBoxLayout(self.widget_command_setting)
         self.horizontalLayout_2.setSpacing(0)
         self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
@@ -191,7 +204,7 @@ class WidgetInstructLine(QWidget):
 
     def select_command(self, command: str):
         """选择命令"""
-        value_widget = eval(f'{code_command_dict[command]}()')  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
+        value_widget = eval(f"{code_command_dict[command]['widget']}()")  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
         layout = self.widget_command_setting.layout()  # 获取对应控件组中用于存放不同命令控件的控件的布局
 
         while layout.count():  # 先清空布局中的原有控件
@@ -1753,7 +1766,7 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = command_widget_click_pic_position()
+    test = WidgetInstructLine()
     # -------------
     layout = QVBoxLayout()
     layout.addWidget(test)
