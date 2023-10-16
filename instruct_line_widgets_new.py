@@ -45,6 +45,24 @@ pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', 
                            'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command',
                            'option', 'optionleft', 'optionright']
 
+
+def check_filename_feasible(filename: str) -> bool:
+    """检查文件名是否符合Windows规范
+    传参: filename 仅文件名（不含路径）"""
+    # 官方文档：文件和文件夹不能命名为“.”或“..”，也不能包含以下任何字符: # % & * | \ : " < > ?/
+    # 检查.
+    if filename[0] == '.':
+        return False
+
+    # 检查# % & * | \ : " < > ?/
+    except_word = [':', '#', '%', '&', '*', '|', '\\', ':', '"', '<', '>', '?', '/']
+    for key in except_word:
+        if key in filename:
+            return False
+
+    return True
+
+
 default_duration: float = 0.25  # 默认移动所需时间
 max_duration: float = 9999.99  # 移动所需时间的最大值限制
 default_presses: int = 1  # 默认重复次数
@@ -54,6 +72,8 @@ default_interval: float = 0.1  # 默认每次点击间隔时间
 max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
 max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
 default_wait_time = 1  # 默认等待时间
+
+error_stylesheet_border = 'border: 1px solid red;'
 
 
 class DropLabel(QLabel):
@@ -186,6 +206,7 @@ class WidgetInstructLine(QWidget):
 
 class command_widget_move_mouse_to_position(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -246,8 +267,8 @@ class command_widget_move_mouse_to_position(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -268,9 +289,9 @@ class command_widget_move_mouse_to_position(QWidget):
         self.signal_args.emit(args_dict)
 
 
-
 class command_widget_drag_mouse_to_position(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -340,8 +361,8 @@ class command_widget_drag_mouse_to_position(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -359,12 +380,14 @@ class command_widget_drag_mouse_to_position(QWidget):
                      'x': x,
                      'y': y,
                      'duration': duration,
-                     'button':button}
+                     'button': button}
 
         self.signal_args.emit(args_dict)
 
+
 class command_widget_mouse_click(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -452,8 +475,8 @@ class command_widget_mouse_click(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -473,14 +496,16 @@ class command_widget_mouse_click(QWidget):
                      'x': x,
                      'y': y,
                      'duration': duration,
-                     'button':button,
-                     'interval':interval,
-                     'clicks':clicks}
+                     'button': button,
+                     'interval': interval,
+                     'clicks': clicks}
 
         self.signal_args.emit(args_dict)
 
+
 class command_widget_mouse_down(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -550,8 +575,8 @@ class command_widget_mouse_down(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -569,13 +594,14 @@ class command_widget_mouse_down(QWidget):
                      'x': x,
                      'y': y,
                      'duration': duration,
-                     'button':button}
+                     'button': button}
 
         self.signal_args.emit(args_dict)
 
 
 class command_widget_mouse_up(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -641,8 +667,8 @@ class command_widget_mouse_up(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -721,7 +747,6 @@ class command_widget_mouse_scroll(QWidget):
         self.check_args()
         self.send_args()
 
-
         """
         槽函数设置
         """
@@ -737,8 +762,8 @@ class command_widget_mouse_scroll(QWidget):
         """检查参数规范"""
         if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
             self.right_args = False
-            self.spinBox_x.setStyleSheet('border: 1px solid red;')
-            self.spinBox_y.setStyleSheet('border: 1px solid red;')
+            self.spinBox_x.setStyleSheet(error_stylesheet_border)
+            self.spinBox_y.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.spinBox_x.setStyleSheet('')
@@ -749,18 +774,19 @@ class command_widget_mouse_scroll(QWidget):
         right_args = self.right_args
         x = self.spinBox_x.value()
         y = self.spinBox_y.value()
-        duration = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText()=='向上' else -self.spinBox_scroll_distance.value()
+        duration = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText() == '向上' else -self.spinBox_scroll_distance.value()
 
-        args_dict = {'right_args':right_args,
-                     'x':x,
-                     'y':y,
-                     'duration':duration}
+        args_dict = {'right_args': right_args,
+                     'x': x,
+                     'y': y,
+                     'duration': duration}
 
         self.signal_args.emit(args_dict)
 
 
 class command_widget_press_text(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -793,7 +819,7 @@ class command_widget_press_text(QWidget):
         """
         初始化
         """
-        self.right_args=True
+        self.right_args = True
         self.send_args()
 
         """"
@@ -805,7 +831,7 @@ class command_widget_press_text(QWidget):
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        message= self.lineEdit_message.text()
+        message = self.lineEdit_message.text()
         interval = self.doubleSpinBox_interval.value()
 
         args_dict = {'right_args': right_args,
@@ -814,8 +840,10 @@ class command_widget_press_text(QWidget):
 
         self.signal_args.emit(args_dict)
 
+
 class command_widget_press_keys(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -856,7 +884,7 @@ class command_widget_press_keys(QWidget):
         """
         初始化
         """
-        self.right_args=False
+        self.right_args = False
         self.check_args()
         self.send_args()
 
@@ -875,11 +903,10 @@ class command_widget_press_keys(QWidget):
         wrong_key = [key for key in keys_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
         if wrong_key:
             self.right_args = False
-            self.lineEdit_keys.setStyleSheet('border: 1px solid red;')
+            self.lineEdit_keys.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.lineEdit_keys.setStyleSheet('')
-
 
     def send_args(self):
         """发送参数设置"""
@@ -891,15 +918,17 @@ class command_widget_press_keys(QWidget):
         presses = self.spinBox_presses.value()
         interval = self.doubleSpinBox_interval.value()
 
-        args_dict = {'right_args':right_args,
-                     'presses':presses,
-                     'interval':interval}
+        args_dict = {'right_args': right_args,
+                     'keys': keys,
+                     'presses': presses,
+                     'interval': interval}
 
         self.signal_args.emit(args_dict)
 
 
 class command_widget_press_hotkey(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -933,14 +962,13 @@ class command_widget_press_hotkey(QWidget):
 
         self.lineEdit_hotkeys.textChanged.connect(self.send_args)
 
-
     def check_args(self):
         """检查参数规范"""
         keys_split = self.lineEdit_hotkeys.text().split(" ")
         wrong_key = [key for key in keys_split if key.lower() not in pyautogui_keyboard_keys and key.strip()]
         if wrong_key:
             self.right_args = False
-            self.lineEdit_hotkeys.setStyleSheet('border: 1px solid red;')
+            self.lineEdit_hotkeys.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.lineEdit_hotkeys.setStyleSheet('')
@@ -952,7 +980,6 @@ class command_widget_press_hotkey(QWidget):
         keys_split = self.lineEdit_hotkeys.text().split(" ")
         hotkeys = [key for key in keys_split if key.lower() in pyautogui_keyboard_keys]
 
-
         args_dict = {'right_args': right_args,
                      'hotkeys': hotkeys}
 
@@ -961,6 +988,7 @@ class command_widget_press_hotkey(QWidget):
 
 class command_widget_press_down_key(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -994,13 +1022,12 @@ class command_widget_press_down_key(QWidget):
 
         self.lineEdit_key.textChanged.connect(self.send_args)
 
-
     def check_args(self):
         """检查参数规范"""
         key = self.lineEdit_key.text().strip()
         if key.lower() not in pyautogui_keyboard_keys:
             self.right_args = False
-            self.lineEdit_key.setStyleSheet('border: 1px solid red;')
+            self.lineEdit_key.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.lineEdit_key.setStyleSheet('')
@@ -1011,7 +1038,6 @@ class command_widget_press_down_key(QWidget):
 
         key = self.lineEdit_key.text().strip()
 
-
         args_dict = {'right_args': right_args,
                      'key': key}
 
@@ -1020,6 +1046,7 @@ class command_widget_press_down_key(QWidget):
 
 class command_widget_press_up_key(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -1058,7 +1085,7 @@ class command_widget_press_up_key(QWidget):
         key = self.lineEdit_key.text().strip()
         if key.lower() not in pyautogui_keyboard_keys:
             self.right_args = False
-            self.lineEdit_key.setStyleSheet('border: 1px solid red;')
+            self.lineEdit_key.setStyleSheet(error_stylesheet_border)
         else:
             self.right_args = True
             self.lineEdit_key.setStyleSheet('')
@@ -1076,9 +1103,13 @@ class command_widget_press_up_key(QWidget):
 
 
 class command_widget_screenshot_fullscreen(QWidget):
+    signal_args = Signal(dict)
 
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -1086,14 +1117,56 @@ class command_widget_screenshot_fullscreen(QWidget):
         self.horizontalLayout.addWidget(self.label_2)
 
         self.lineEdit_pic_file = QLineEdit()
-        self.lineEdit_pic_file.setPlaceholderText('输入完整路径或文件名')
+        self.lineEdit_pic_file.setPlaceholderText('输入文件名（不含后缀），如存在则覆盖')
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
+
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_pic_file.textChanged.connect(self.check_args)
+
+        self.lineEdit_pic_file.textChanged.connect(self.send_args)
+
+    def check_args(self):
+        """检查参数规范"""
+        pic_file = self.lineEdit_pic_file.text().strip()
+        if not pic_file or not check_filename_feasible(pic_file):
+            self.right_args = False
+            self.lineEdit_pic_file.setStyleSheet(error_stylesheet_border)
+        else:
+
+            self.right_args = True
+            self.lineEdit_pic_file.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        pic_file_name = self.lineEdit_pic_file.text().strip()
+        pic_file_suffix = '.png'
+        pic_file = pic_file_name + pic_file_suffix
+
+        args_dict = {'right_args': right_args,
+                     'pic_file': pic_file}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_screenshot_area(QWidget):
+    signal_args = Signal(dict)
 
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label_2 = QLabel()
@@ -1137,14 +1210,108 @@ class command_widget_screenshot_area(QWidget):
         self.horizontalLayout.addWidget(self.label_6)
 
         self.lineEdit_pic_file = QLineEdit()
-        self.lineEdit_pic_file.setPlaceholderText('输入完整路径或文件名')
+        self.lineEdit_pic_file.setPlaceholderText('输入文件名（不含后缀），如存在则覆盖')
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
+
+        """
+        初始化
+        """
+        self.right_args_filename = False
+        self.right_args_xy = False
+        self.check_args_filename()
+        self.check_args_xy()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.lineEdit_pic_file.textChanged.connect(self.check_args_filename)
+        self.spinBox_xl.valueChanged.connect(self.check_args_xy)
+        self.spinBox_yl.valueChanged.connect(self.check_args_xy)
+        self.spinBox_xr.valueChanged.connect(self.check_args_xy)
+        self.spinBox_yr.valueChanged.connect(self.check_args_xy)
+
+        self.lineEdit_pic_file.textChanged.connect(self.send_args)
+        self.spinBox_xl.valueChanged.connect(self.send_args)
+        self.spinBox_yl.valueChanged.connect(self.send_args)
+        self.spinBox_xr.valueChanged.connect(self.send_args)
+        self.spinBox_yr.valueChanged.connect(self.send_args)
+
+    def check_args_filename(self):
+        """检查参数规范"""
+        pic_file = self.lineEdit_pic_file.text().strip()
+        if not pic_file or not check_filename_feasible(pic_file):
+            self.right_args_filename = False
+            self.lineEdit_pic_file.setStyleSheet(error_stylesheet_border)
+        else:
+
+            self.right_args_filename = True
+            self.lineEdit_pic_file.setStyleSheet('')
+
+    def check_args_xy(self):
+        """检查参数规范"""
+        x_1 = self.spinBox_xl.value()
+        y_1 = self.spinBox_yl.value()
+        x_2 = self.spinBox_xr.value()
+        y_2 = self.spinBox_yr.value()
+
+        if x_1 == x_2:
+            check_x = False
+            self.spinBox_xl.setStyleSheet(error_stylesheet_border)
+            self.spinBox_xr.setStyleSheet(error_stylesheet_border)
+        else:
+            check_x = True
+            self.spinBox_xl.setStyleSheet('')
+            self.spinBox_xr.setStyleSheet('')
+
+        if y_1 == y_2:
+            check_y = False
+            self.spinBox_yl.setStyleSheet(error_stylesheet_border)
+            self.spinBox_yr.setStyleSheet(error_stylesheet_border)
+        else:
+            check_y = True
+            self.spinBox_yl.setStyleSheet('')
+            self.spinBox_yr.setStyleSheet('')
+
+        if check_x and check_y:
+            self.right_args_xy = True
+        else:
+            self.right_args_xy = False
+
+    def send_args(self):
+        """发送参数设置"""
+        if self.right_args_filename and self.right_args_xy:
+            right_args = True
+        else:
+            right_args = False
+
+        pic_file_name = self.lineEdit_pic_file.text().strip()
+        pic_file_suffix = '.png'
+        pic_file = pic_file_name + pic_file_suffix
+
+        x_1 = self.spinBox_xl.value()
+        y_1 = self.spinBox_yl.value()
+        x_2 = self.spinBox_xr.value()
+        y_2 = self.spinBox_yr.value()
+        xl, xr = sorted([x_1, x_2])
+        yl, yr = sorted([y_1, y_2])
+        area = (xl, yl, xr, yr)
+
+        args_dict = {'right_args': right_args,
+                     'pic_file': pic_file,
+                     'area': area}
+
+        self.signal_args.emit(args_dict)
 
 
 class command_widget_move_to_pic_position(QWidget):
+    signal_args = Signal(dict)
 
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
 
         self.label = QLabel()
@@ -1192,11 +1359,99 @@ class command_widget_move_to_pic_position(QWidget):
         self.toolButton_screenshot.setText('截图')
         self.horizontalLayout.addWidget(self.toolButton_screenshot)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.toolButton_choose_pic.clicked.connect(self.choose_pic)
+        self.toolButton_screenshot.clicked.connect(self.screenshot)
+
+        self.label_show_pic.signal_QLabel_dropped.connect(self.check_args)
+
+        self.label_show_pic.signal_QLabel_dropped.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_find_model.currentTextChanged.connect(self.send_args)
+
+    def choose_pic(self, pic_file=None):
+        """弹出文件对话框选择图片，并设置label属性
+        可传入pic_file参数来跳过对话框"""
+        if not pic_file:
+            pic_file, _ = QFileDialog.getOpenFileName(self, "选择图片", "./", "图片文件(*.png *.jpg *.bmp)")
+
+        if pic_file:
+            self.label_show_pic.setProperty('pic_path', pic_file)
+            pixmap = QPixmap(pic_file)
+            resize = calculate_resize(self.label_show_pic.size(), pixmap.size())
+            pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
+            self.label_show_pic.setPixmap(pixmap)
+
+            self.check_args()
+            self.send_args()
+
+    def screenshot(self):
+        """截屏"""
+        dialog = qdialog_screenshot.QDialogScreenshot()
+        dialog.signal_screenshot_area.connect(dialog.close)  # 先关闭dialog再进行截图，防止将遮罩也截入
+        dialog.signal_screenshot_area.connect(self.get_screenshot_area)
+        dialog.exec_()
+
+    def get_screenshot_area(self, screenshot_area: list):
+        """获取截屏区域的信号"""
+        x_start, y_start, x_end, y_end = screenshot_area
+        if x_start > x_end:  # pyautogui的截图只支持正数，所以需要调换
+            x_start, x_end = x_end, x_start
+        if y_start > y_end:  # pyautogui的截图只支持正数，所以需要调换
+            y_start, y_end = y_end, y_start
+
+        format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
+        print(f'截图区域 {format_area}')
+
+        save_pic_file = f'config/{create_random_string(16)}.png'
+        pyautogui.screenshot(save_pic_file, region=format_area)
+        self.choose_pic(save_pic_file)
+
+        self.check_args()
+
+    def check_args(self):
+        """检查参数规范"""
+        pic_file = self.label_show_pic.property('pic_path')
+        if not pic_file or not os.path.exists(pic_file) or not filetype.is_image(pic_file):
+            self.right_args = False
+            self.label_show_pic.setStyleSheet(error_stylesheet_border)
+        else:
+            self.right_args = True
+            self.label_show_pic.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        pic_file = self.label_show_pic.property('pic_path')
+        find_model = self.comboBox_find_model.currentText()
+        duration = self.doubleSpinBox_duration.value()
+
+        args_dict = {'right_args': right_args,
+                     'pic_file': pic_file,
+                     'duration': duration,
+                     'find_model': find_model}
+
+        self.signal_args.emit(args_dict)
+
 
 class command_widget_click_pic_position(QWidget):
+    signal_args = Signal(dict)
 
     def __init__(self):
         super().__init__()
+        """
+        ui设置
+        """
         self.horizontalLayout_top = QHBoxLayout(self)
         self.horizontalLayout_top.setSpacing(5)
         self.horizontalLayout_top.setContentsMargins(0, 0, 0, 0)
@@ -1250,6 +1505,7 @@ class command_widget_click_pic_position(QWidget):
         self.spinBox_clicks = QSpinBox()
         self.spinBox_clicks.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_clicks.setValue(default_clicks)
+        self.spinBox_clicks.setMinimum(1)
         self.spinBox_clicks.setMaximum(max_clicks)
         self.horizontalLayout_line2.addWidget(self.spinBox_clicks)
 
@@ -1292,9 +1548,103 @@ class command_widget_click_pic_position(QWidget):
         self.horizontalLayout_top.addLayout(self.verticalLayout_line)
         self.horizontalLayout_top.addLayout(self.horizontalLayout_button)
 
+        """
+        初始化
+        """
+        self.right_args = False
+        self.check_args()
+        self.send_args()
+
+        """
+        槽函数设置
+        """
+        self.toolButton_choose_pic.clicked.connect(self.choose_pic)
+        self.toolButton_screenshot.clicked.connect(self.screenshot)
+
+        self.label_show_pic.signal_QLabel_dropped.connect(self.check_args)
+
+        self.label_show_pic.signal_QLabel_dropped.connect(self.send_args)
+        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
+        self.comboBox_find_model.currentTextChanged.connect(self.send_args)
+        self.comboBox_button.currentTextChanged.connect(self.send_args)
+        self.spinBox_clicks.valueChanged.connect(self.send_args)
+        self.doubleSpinBox_interval.valueChanged.connect(self.send_args)
+
+    def choose_pic(self, pic_file=None):
+        """弹出文件对话框选择图片，并设置label属性
+        可传入pic_file参数来跳过对话框"""
+        if not pic_file:
+            pic_file, _ = QFileDialog.getOpenFileName(self, "选择图片", "./", "图片文件(*.png *.jpg *.bmp)")
+
+        if pic_file:
+            self.label_show_pic.setProperty('pic_path', pic_file)
+            pixmap = QPixmap(pic_file)
+            resize = calculate_resize(self.label_show_pic.size(), pixmap.size())
+            pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
+            self.label_show_pic.setPixmap(pixmap)
+
+            self.check_args()
+            self.send_args()
+
+    def screenshot(self):
+        """截屏"""
+        dialog = qdialog_screenshot.QDialogScreenshot()
+        dialog.signal_screenshot_area.connect(dialog.close)  # 先关闭dialog再进行截图，防止将遮罩也截入
+        dialog.signal_screenshot_area.connect(self.get_screenshot_area)
+        dialog.exec_()
+
+    def get_screenshot_area(self, screenshot_area: list):
+        """获取截屏区域的信号"""
+        x_start, y_start, x_end, y_end = screenshot_area
+        if x_start > x_end:  # pyautogui的截图只支持正数，所以需要调换
+            x_start, x_end = x_end, x_start
+        if y_start > y_end:  # pyautogui的截图只支持正数，所以需要调换
+            y_start, y_end = y_end, y_start
+
+        format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
+        print(f'截图区域 {format_area}')
+
+        save_pic_file = f'config/{create_random_string(16)}.png'
+        pyautogui.screenshot(save_pic_file, region=format_area)
+        self.choose_pic(save_pic_file)
+
+        self.check_args()
+
+    def check_args(self):
+        """检查参数规范"""
+        pic_file = self.label_show_pic.property('pic_path')
+        if not pic_file or not os.path.exists(pic_file) or not filetype.is_image(pic_file):
+            self.right_args = False
+            self.label_show_pic.setStyleSheet(error_stylesheet_border)
+        else:
+            self.right_args = True
+            self.label_show_pic.setStyleSheet('')
+
+    def send_args(self):
+        """发送参数设置"""
+        right_args = self.right_args
+
+        pic_file = self.label_show_pic.property('pic_path')
+        find_model = self.comboBox_find_model.currentText()
+        duration = self.doubleSpinBox_duration.value()
+        button = self.comboBox_button.currentText()
+        clicks = self.spinBox_clicks.value()
+        interval = self.doubleSpinBox_interval.value()
+
+        args_dict = {'right_args': right_args,
+                     'pic_file': pic_file,
+                     'duration': duration,
+                     'find_model': find_model,
+                     'button': button,
+                     'clicks': clicks,
+                     'interval': interval}
+
+        self.signal_args.emit(args_dict)
+
 
 class command_widget_wait(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -1333,13 +1683,14 @@ class command_widget_wait(QWidget):
         wait_time = self.doubleSpinBox_wait_time.value()
 
         args_dict = {'right_args': right_args,
-                     'wait_time':wait_time}
+                     'wait_time': wait_time}
 
         self.signal_args.emit(args_dict)
 
 
 class command_widget_wait_random(QWidget):
     signal_args = Signal(dict)
+
     def __init__(self):
         super().__init__()
         """
@@ -1374,7 +1725,7 @@ class command_widget_wait_random(QWidget):
         """
         初始化
         """
-        self.right_args=True
+        self.right_args = True
         self.send_args()
 
         """
@@ -1389,7 +1740,7 @@ class command_widget_wait_random(QWidget):
 
         wait_time_min = self.doubleSpinBox_wait_time_min.value()
         wait_time_max = self.doubleSpinBox_wait_time_max.value()
-        wait_time_random = round(random.uniform(wait_time_min, wait_time_max),2)
+        wait_time_random = round(random.uniform(wait_time_min, wait_time_max), 2)
 
         args_dict = {'right_args': right_args,
                      'wait_time': wait_time_random}
@@ -1402,7 +1753,7 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = command_widget_screenshot_fullscreen()
+    test = command_widget_click_pic_position()
     # -------------
     layout = QVBoxLayout()
     layout.addWidget(test)
