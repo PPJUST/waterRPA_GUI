@@ -3,7 +3,7 @@ import time
 from typing import Tuple, Union
 
 import pyautogui
-
+import random
 default_duration: float = 0.25  # 默认移动所需时间
 max_duration: float = 9999.99  # 移动所需时间的最大值限制
 default_presses: int = 1  # 默认重复次数
@@ -214,6 +214,11 @@ class instruct_custom:
     """pyautogui的其他操作的简单封装"""
 
     @staticmethod
-    def wait(wait_time: float):
-        """等待指定时间"""
-        time.sleep(wait_time)
+    def wait(wait_time: Union[float, tuple]):
+        """等待指定时间，传入float或tuple"""
+        if type(wait_time) is float:
+            time.sleep(wait_time)
+        else:
+            wait_time_random = round(random.uniform(wait_time[0],wait_time[1]), 2)
+            time.sleep(wait_time_random)
+

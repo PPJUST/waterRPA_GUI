@@ -17,17 +17,7 @@ icon_error = r'icon/error.png'
 icon_right = r'icon/right.png'
 
 
-code_command_dict = {'': '',
-                     '单击左键': 'widget_command_pic',
-                     '双击左键': 'widget_command_pic',
-                     '单击右键': 'widget_command_pic',
-                     '输入文本': 'widget_command_input',
-                     '等待时间': 'widget_command_wait',
-                     '等待时间(随机)': 'widget_command_wait',
-                     '滚动滚轮': 'widget_command_scroll',
-                     '模拟按键': 'widget_command_hotkey',
-                     '自定义命令': 'widget_command_custom'}  # 第一个元素留空，用于初始显示
-# 备忘录 修改文本描述 区分鼠标、键盘、图像操作
+
 
 class Main(QMainWindow):
     def __init__(self):
@@ -44,6 +34,7 @@ class Main(QMainWindow):
         self.insert_instruct_line_widgets()  # 生成一个初始控件组
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
 
+        self.instruct_setting = dict()  # 存放各个命令行的参数设置，格式为{命令行id:{args_dict数据},...}
         """
         连接信号与槽函数
         """
@@ -52,6 +43,10 @@ class Main(QMainWindow):
         # 功能区
         self.ui.pushButton_start.clicked.connect(self.start_instruct)
         self.ui.pushButton_stop.clicked.connect(self.stop_instruct)
+
+    def get_args(self,args_dict):
+        instruct_id = self.sender().property('id')
+        self.instruct_setting[instruct_id] = args_dict
 
     def insert_instruct_line_widgets(self):
         """插入指令行控件组
@@ -63,38 +58,38 @@ class Main(QMainWindow):
             index = self.ui.listWidget_instruct_area.count()
 
         # 在当前索引后插入新的控件组
-        widget_instruct = widget_instruct_line()
+        widget_instruct = WidgetInstructLine()
+        widget_instruct.setProperty('id', create_random_string(16))  # 设置命令行控件组的唯一id
         list_widget_item = QListWidgetItem()
         list_widget_item.setSizeHint(widget_instruct.sizeHint() * 2)  # 设置列表项的大小
         list_widget_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)  # 启用列表项的拖放支持
         self.ui.listWidget_instruct_area.insertItem(index + 1, list_widget_item)
         self.ui.listWidget_instruct_area.setItemWidget(list_widget_item, widget_instruct)
 
-        # 设置comboBox的选项
-        widget_instruct.comboBox_select_command.addItems(code_command_dict)
-        # 设置状态label的图标
-        pixmap = QPixmap(icon_edit)
-        resize = calculate_resize(widget_instruct.label_state.size(), pixmap.size())
-        pixmap = pixmap.scaled(resize, spectRatioMode=Qt.KeepAspectRatio)  # 保持纵横比
-        widget_instruct.label_state.setPixmap(pixmap)
-
-
-
-
         # 内部控件连接槽函数
         widget_instruct.toolButton_add_instruct.clicked.connect(self.insert_instruct_line_widgets)
         widget_instruct.toolButton_delete_instruct.clicked.connect(self.delete_instruct_line_widgets)
 
-    def get_index_of_current_widgets(self, sender):
+        widget_instruct.signal_send_args.connect(self.get_args)
+
+
+
+
+    def get_index_of_current_widgets(self, sender,position='in_instruct'):
         """获取当前操作的控件在控件区中的索引号
-        传参：sender 即self.sender()"""
-        parent_widget = sender.parentWidget()
+        传参：
+        sender 即self.sender()
+        position 控件位置，外部的指令行控件组'instruct'，或控件组内部控件'in_instruct'"""
+        if position == 'in_instruct':
+            instruct_widget = sender.parentWidget()
+        else:
+            instruct_widget = sender
 
         for i in range(self.ui.listWidget_instruct_area.count()):
             item = self.ui.listWidget_instruct_area.item(i)
             item_widget = self.ui.listWidget_instruct_area.itemWidget(item)
 
-            if item_widget is parent_widget:
+            if item_widget is instruct_widget:
                 print(f'当前操作的控件在控件区中的索引号：{i}')
                 return i
 
@@ -114,45 +109,25 @@ class Main(QMainWindow):
 
         for i in range(total_command_number):
             item = self.ui.listWidget_instruct_area.item(i)
-            item_widget = self.ui.listWidget_instruct_area.itemWidget(item)
-            command_type = item_widget.comboBox_select_command.currentText()
-            command_widget = item_widget.widget_command_setting.layout().itemAt(0).widget()
-            print(command_widget)
-            # 备忘录 后期优化
-            time.sleep(0.1)  # 每个指令键暂停0.1秒
-            if command_type == '单击左键':
-                click_time = 1
-                l_or_r_click = 'left'
-                pic_file = command_widget.label_show_pic.property('pic_path')  # 图片的路径存放在property中
-                instruct_pic_click(click_time, l_or_r_click, pic_file)
-            elif command_type == '双击左键':
-                click_time = 2
-                l_or_r_click = 'left'
-                pic_file = command_widget.label_show_pic.property('pic_path')
-                print(pic_file)
-                instruct_pic_click(click_time, l_or_r_click, pic_file)
-            elif command_type == '单击右键':
-                click_time = 1
-                l_or_r_click = 'right'
-                pic_file = command_widget.label_show_pic.property('pic_path')
-                instruct_pic_click(click_time, l_or_r_click, pic_file)
-            elif command_type == '输入文本':
-                text = command_widget.lineEdit_input.text()
-                instruct_input(text)
-            elif command_type == '等待时间':
-                wait_time = command_widget.doubleSpinBox_wait_second.value()
-                instruct_wait(wait_time)
-            elif command_type == '等待时间(随机)':
-                pass
-            elif command_type == '滚动滚轮':
-                direction = command_widget.comboBox_scroll_direction.currentText()
-                distance = command_widget.spinBox_scroll_distance.value()
-                instruct_scroll(direction, distance)
-            elif command_type == '模拟按键':
-                hotkey_str = command_widget.lineEdit_hotkey.text()
-                instruct_hotkey(hotkey_str)
-            elif command_type == '自定义命令':
-                pass
+            instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
+            command_type = instruct_widget.comboBox_select_command.currentText()  # 获取指令中文名
+            instruct_id = instruct_widget.property('id')  # 获取控件组id
+            instruct_funciton = code_command_dict[command_type]['function']  # 查表获取完整函数str
+            instruct_data = self.instruct_setting[instruct_id]  # 根据id获取参数str
+
+            # 将字典项转换为变量，用于后续调用函数
+            for key in instruct_data:
+                value = instruct_data[key]
+                if type(value) is str:
+                    exec(f"{key}='{value}'")
+                else:
+                    exec(f'{key}={value}')
+                print((f'{key}={value}'))
+
+            # 调用对应函数，相关变量已使用exec创建
+            exec(f'{instruct_funciton}')
+
+
 
     def stop_instruct(self):
         """中止指令"""

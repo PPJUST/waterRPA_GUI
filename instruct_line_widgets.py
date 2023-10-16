@@ -18,29 +18,23 @@ import qdialog_screenshot
 # 对应字典设计 combox项:{function:对应函数, widget:对应控件}
 # 第一个元素留空，用于初始显示
 code_command_dict = {'': {'function': '', 'widget': ''},
-                     '鼠标操作-移动': {'function': 'move_mouse_to_position',
-                                       'widget': 'command_widget_move_mouse_to_position'},
-                     '鼠标操作-按下并拖拽': {'function': 'drag_mouse_to_position',
-                                             'widget': 'command_widget_drag_mouse_to_position'},
-                     '鼠标操作-点击': {'function': 'mouse_click', 'widget': 'command_widget_mouse_click'},
-                     '鼠标操作-按下(不释放)': {'function': 'mouse_down', 'widget': 'command_widget_mouse_down'},
-                     '鼠标操作-释放': {'function': 'mouse_up', 'widget': 'command_widget_mouse_up'},
-                     '鼠标操作-滚动滚轮': {'function': 'mouse_scroll', 'widget': 'command_widget_mouse_scroll'},
-                     '键盘操作-输入文本': {'function': 'press_text', 'widget': 'command_widget_press_text'},
-                     '键盘操作-敲击': {'function': 'press_keys', 'widget': 'command_widget_press_keys'},
-                     '键盘操作-使用热键': {'function': 'press_hotkey', 'widget': 'command_widget_press_hotkey'},
-                     '键盘操作-按下(不释放)': {'function': 'press_down_key', 'widget': 'command_widget_press_down_key'},
-                     '键盘操作-释放': {'function': 'press_up_key', 'widget': 'command_widget_press_up_key'},
-                     '图像操作-全屏截图': {'function': 'screenshot_fullscreen',
-                                           'widget': 'command_widget_screenshot_fullscreen'},
-                     '图像操作-区域截图': {'function': 'screenshot_area', 'widget': 'command_widget_screenshot_area'},
-                     '图像操作-匹配图片并移动': {'function': 'move_to_pic_position',
-                                                 'widget': 'command_widget_move_to_pic_position'},
-                     '图像操作-匹配图片并点击': {'function': 'click_pic_position',
-                                                 'widget': 'command_widget_click_pic_position'},
-                     '其他-等待时间': {'function': 'wait', 'widget': 'command_widget_wait'},
-                     '其他-等待时间（区间随机）': {'function': 'wait', 'widget': 'command_widget_wait_random'}}
-
+'鼠标操作-移动':{'function':'instruct_mouse.move_mouse_to_position(x=x,y=y,duration=duration)','widget':'command_widget_move_mouse_to_position'},
+'鼠标操作-按下并拖拽':{'function':'instruct_mouse.drag_mouse_to_position(x=x,y=y,button=button,duration=duration)','widget':'command_widget_drag_mouse_to_position'},
+'鼠标操作-点击':{'function':'instruct_mouse.mouse_click(x=x,y=y,button=button,clicks=clicks,interval=interval,duration=duration)','widget':'command_widget_mouse_click'},
+'鼠标操作-按下(不释放)':{'function':'instruct_mouse.mouse_down(x=x,y=y,button=button,duration=duration)','widget':'command_widget_mouse_down'},
+'鼠标操作-释放':{'function':'instruct_mouse.mouse_up(x=x,y=y,button=button,duration=duration)','widget':'command_widget_mouse_up'},
+'鼠标操作-滚动滚轮':{'function':'instruct_mouse.mouse_scroll(x=x,y=y,distance=distance)','widget':'command_widget_mouse_scroll'},
+'键盘操作-输入文本':{'function':'instruct_keyboard.press_text(message=message,interval=interval)','widget':'command_widget_press_text'},
+'键盘操作-敲击':{'function':'instruct_keyboard.press_keys(keys=keys,presses=presses,interval=interval)','widget':'command_widget_press_keys'},
+'键盘操作-使用热键':{'function':'instruct_keyboard.press_hotkey(hotkeys=hotkeys)','widget':'command_widget_press_hotkey'},
+'键盘操作-按下(不释放)':{'function':'instruct_keyboard.press_down_key(key=key)','widget':'command_widget_press_down_key'},
+'键盘操作-释放':{'function':'instruct_keyboard.press_up_key(key=key)','widget':'command_widget_press_up_key'},
+'图像操作-全屏截图':{'function':'instruct_pic.screenshot_fullscreen(pic_file=pic_file)','widget':'command_widget_screenshot_fullscreen'},
+'图像操作-区域截图':{'function':'instruct_pic.screenshot_area(pic_file=pic_file,area=area)','widget':'command_widget_screenshot_area'},
+'图像操作-匹配图片并移动':{'function':'instruct_pic.move_to_pic_position(pic_file=pic_file,duration=duration,find_model=find_model)','widget':'command_widget_move_to_pic_position'},
+'图像操作-匹配图片并点击':{'function':'instruct_pic.click_pic_position(clicks=clicks,button=button,pic_file=pic_file,interval=interval,duration=duration,find_model=find_model)','widget':'command_widget_click_pic_position'},
+'其他-等待时间':{'function':'instruct_custom.wait(wait_time=wait_time)','widget':'command_widget_wait'},
+'其他-等待时间（区间随机）':{'function':'instruct_custom.wait(wait_time=wait_time)','widget':'command_widget_wait_random'}}
 
 
 pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.',
@@ -89,6 +83,10 @@ default_interval: float = 0.1  # 默认每次点击间隔时间
 max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
 max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
 default_wait_time = 1  # 默认等待时间
+
+icon_edit = r'icon/edit.png'
+icon_error = r'icon/error.png'
+icon_right = r'icon/right.png'
 
 error_stylesheet_border = 'border: 1px solid red;'
 
@@ -165,7 +163,7 @@ def create_random_string(length: int):
 
 class WidgetInstructLine(QWidget):
     """整个指令控件组"""
-
+    signal_send_args=Signal(dict)  # 子控件信号的中转发送
     def __init__(self):
         super().__init__()
         # 初始化
@@ -173,9 +171,12 @@ class WidgetInstructLine(QWidget):
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
 
-        self.label_state = QLabel()
-        self.label_state.setText('状态')
-        self.horizontalLayout.addWidget(self.label_state)
+        self.toolButton_state = QToolButton()
+        self.toolButton_state.setText('状态')
+        self.toolButton_state.setAutoRaise(True)
+        self.toolButton_state.setIcon(QIcon(icon_edit))
+
+        self.horizontalLayout.addWidget(self.toolButton_state)
 
         self.toolButton_add_instruct = QToolButton()
         self.toolButton_add_instruct.setText('+')
@@ -187,14 +188,15 @@ class WidgetInstructLine(QWidget):
 
         self.comboBox_select_command = QComboBox()
         self.comboBox_select_command.addItems(list(code_command_dict.keys()))
-        self.comboBox_select_command.setMinimumWidth(80)
-        self.comboBox_select_command.setMaximumWidth(80)
+        # self.comboBox_select_command.setMinimumWidth(80)
+        # self.comboBox_select_command.setMaximumWidth(80)
         self.horizontalLayout.addWidget(self.comboBox_select_command)
 
         self.widget_command_setting = QWidget()
-        self.horizontalLayout_2 = QHBoxLayout(self.widget_command_setting)
-        self.horizontalLayout_2.setSpacing(0)
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.horizontalLayout_command_setting = QHBoxLayout()
+        self.horizontalLayout_command_setting.setSpacing(0)
+        self.horizontalLayout_command_setting.setContentsMargins(0, 0, 0, 0)
+        self.widget_command_setting.setLayout(self.horizontalLayout_command_setting)
         self.horizontalLayout.addWidget(self.widget_command_setting)
 
         self.horizontalLayout.setStretch(4, 1)
@@ -215,7 +217,12 @@ class WidgetInstructLine(QWidget):
 
         if value_widget:
             layout.addWidget(value_widget)
+            value_widget.signal_args.connect(self.get_command_signal)
+            value_widget.send_args()  # 执行一次子控件的发送信号函数，用于发送初始数据
 
+    def get_command_signal(self, args_dict):
+        """获取子控件的信号，并发送"""
+        self.signal_send_args.emit(args_dict)
 
 class command_widget_move_mouse_to_position(QWidget):
     signal_args = Signal(dict)
@@ -1753,10 +1760,10 @@ class command_widget_wait_random(QWidget):
 
         wait_time_min = self.doubleSpinBox_wait_time_min.value()
         wait_time_max = self.doubleSpinBox_wait_time_max.value()
-        wait_time_random = round(random.uniform(wait_time_min, wait_time_max), 2)
+        wait_time = (wait_time_min,wait_time_max)
 
         args_dict = {'right_args': right_args,
-                     'wait_time': wait_time_random}
+                     'wait_time': wait_time}
 
         self.signal_args.emit(args_dict)
 
