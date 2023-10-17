@@ -1,13 +1,19 @@
 """pyautogui的封装"""
+import random
 import time
 from typing import Tuple, Union
 
 import pyautogui
-import random
-from constant_setting import *
+
+"""参数默认设置"""
+_default_duration: float = 0.25  # 默认移动所需时间
+_default_clicks: int = 1  # 默认点击次数
+_default_interval: float = 0.1  # 默认每次点击间隔时间
+_default_presses: int = 1  # 默认重复次数
+_default_confidence = 0.9  # 默认寻图精度
 
 
-class instruct_mouse:
+class InstructMouse:
     """pyautogui的鼠标操作的简单封装
 
     内部变量说明：
@@ -27,21 +33,21 @@ class instruct_mouse:
         return current_mouse_x, current_mouse_y
 
     @staticmethod
-    def move_mouse_to_position(x: int, y: int, duration: float = default_duration):
+    def move_mouse_to_position(x: int, y: int, duration: float = _default_duration):
         """移动鼠标至指定坐标轴
         duration 为移动所需时间，0为瞬间移动"""
         pyautogui.moveTo(x, y, duration=duration)
 
     @staticmethod
-    def drag_mouse_to_position(x: int, y: int, button: str = 'left', duration: float = default_duration):
+    def drag_mouse_to_position(x: int, y: int, button: str = 'left', duration: float = _default_duration):
         """按下鼠标键，拖拽至指定坐标轴
         button 为指定键，可设置为"left", "middle", right"
         duration 为移动所需时间，0为瞬间移动"""
         pyautogui.dragTo(x, y, button=button, duration=duration)
 
     @staticmethod
-    def mouse_click(button: str = 'left', clicks: int = default_clicks,
-                    interval: float = default_interval):
+    def mouse_click(button: str = 'left', clicks: int = _default_clicks,
+                    interval: float = _default_interval):
         """点击鼠标
         button 为点击的按键，可设置为"left", "middle", right
         clicks 为点击次数
@@ -67,7 +73,7 @@ class instruct_mouse:
         pyautogui.scroll(clicks=distance)
 
 
-class instruct_keyboard:
+class InstructKeyboard:
     """pyautogui的键盘操作的简单封装
 
     内部变量说明：
@@ -77,13 +83,13 @@ class instruct_keyboard:
     interval 为间隔时间"""
 
     @staticmethod
-    def press_text(message: str, interval: float = default_interval):
+    def press_text(message: str, interval: float = _default_interval):
         """输入字符串
         interval为 每次输入的间隔时间"""
         pyautogui.typewrite(message=message, interval=interval)
 
     @staticmethod
-    def press_keys(*keys: str, presses: int = default_presses, interval: float = default_interval):
+    def press_keys(*keys: str, presses: int = _default_presses, interval: float = _default_interval):
         """敲击指定键
         keys 传入多个str，不可传入list
         presses 为重复次数
@@ -107,7 +113,7 @@ class instruct_keyboard:
         pyautogui.hotkey(hotkeys)
 
 
-class instruct_pic:
+class InstructPic:
     """pyautogui的图像操作的简单封装
 
     图像的操作调用了PyScreeze库
@@ -130,7 +136,9 @@ class instruct_pic:
         pyautogui.screenshot(pic_file, region=region)
 
     @staticmethod
-    def _search_pic_first_position(pic_file: str, confidence: float = default_confidence) -> Tuple[Union[int, None], Union[int, None]]:
+    def _search_pic_first_position(pic_file: str,
+                                   confidence: float = _default_confidence
+                                   ) -> Tuple[Union[int, None], Union[int, None]]:
         """获得在屏幕上第一个找到的文件图片的中心点坐标，如果没有找到则返回None
         confidence 为查找精度"""
         position = pyautogui.locateCenterOnScreen(pic_file, confidence=confidence)
@@ -142,7 +150,7 @@ class instruct_pic:
         return x, y
 
     @staticmethod
-    def _search_pic_all_position(pic_file: str, confidence: float = default_confidence) -> list:
+    def _search_pic_all_position(pic_file: str, confidence: float = _default_confidence) -> list:
         """获得在屏幕上所有找到的文件图片的中心点坐标，如果没有找到则返回None
         返回的坐标格式为[(x, y), (x_1, y_2)]
         confidence 为查找精度"""
@@ -156,27 +164,27 @@ class instruct_pic:
         return all_center_position
 
     @staticmethod
-    def move_to_pic_position(pic_file, duration=default_duration, find_model: str = '第一个') -> bool:
+    def move_to_pic_position(pic_file, duration=_default_duration, find_model: str = '第一个') -> bool:
         """匹配图片并移动指令（两个函数的组合）
         pic_file 为图片文件路径
         duration 为移动所需时间，0为瞬间移动
         find_model 为查找模式，'第一个'或'全部'，用于点击"""
-        all_center_position = instruct_pic._search_pic_first_position(pic_file)
+        all_center_position = InstructPic._search_pic_first_position(pic_file)
         if all_center_position:
             if find_model == '第一个':
                 x, y = all_center_position[0]
-                instruct_mouse.move_mouse_to_position(x, y, duration=duration)
+                InstructMouse.move_mouse_to_position(x, y, duration=duration)
             elif find_model == '全部':
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
-                    instruct_mouse.mouse_click(x, y, duration=duration)
+                    InstructMouse.move_mouse_to_position(x, y, duration=duration)
         else:  # 重试识别不在本函数内执行，在外部调用时设置
             print('无匹配项')
             return False
 
     @staticmethod
-    def click_pic_position(pic_file, button: str = 'left', clicks: int = default_clicks,
-                           interval: float = default_interval, duration=default_duration,
+    def click_pic_position(pic_file, button: str = 'left', clicks: int = _default_clicks,
+                           interval: float = _default_interval, duration=_default_duration,
                            find_model: str = '第一个') -> bool:
         """匹配图片并点击指令（两个函数的组合）
         button 为点击的按键，可设置为"left", "middle", right
@@ -185,21 +193,23 @@ class instruct_pic:
         interval 为点击间隔时间
         duration 为移动所需时间，0为瞬间移动
         find_model 为查找模式，'第一个匹配项'或'全部匹配项'，用于点击"""
-        all_center_position = instruct_pic._search_pic_first_position(pic_file)
+        all_center_position = InstructPic._search_pic_first_position(pic_file)
         if all_center_position:
             if find_model == '第一个':
                 x, y = all_center_position[0]
-                instruct_mouse.mouse_click(x, y, button=button, clicks=clicks, interval=interval, duration=duration)
+                InstructMouse.move_mouse_to_position(x=x, y=y, duration=duration)
+                InstructMouse.mouse_click(button=button, clicks=clicks, interval=interval)
             elif find_model == '全部':
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
-                    instruct_mouse.mouse_click(x, y, button=button, clicks=clicks, interval=interval, duration=duration)
+                    InstructMouse.move_mouse_to_position(x=x, y=y, duration=duration)
+                    InstructMouse.mouse_click(button=button, clicks=clicks, interval=interval)
         else:  # 重试识别不在本函数内执行，在外部调用时设置
             print("无匹配项")
             return False
 
 
-class instruct_custom:
+class InstructCustom:
     """pyautogui的其他操作的简单封装"""
 
     @staticmethod
@@ -208,6 +218,5 @@ class instruct_custom:
         if type(wait_time) is float:
             time.sleep(wait_time)
         else:
-            wait_time_random = round(random.uniform(wait_time[0],wait_time[1]), 2)
+            wait_time_random = round(random.uniform(wait_time[0], wait_time[1]), 2)
             time.sleep(wait_time_random)
-

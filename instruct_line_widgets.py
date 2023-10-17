@@ -1,35 +1,21 @@
-"""
-单个控件组内部的操作都在该模块实现
-"""
+"""单个控件组内部的操作都在该模块实现"""
+
 import os
-import random
 from typing import Union
+
 import filetype
 import pyautogui
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Signal, QSize, Qt
+from PySide2.QtGui import QDropEvent, QPixmap, QDragEnterEvent, QIcon
+from PySide2.QtWidgets import QLabel, QWidget, QToolButton, QAbstractSpinBox, QHBoxLayout, QSpinBox, QComboBox, \
+    QDoubleSpinBox, QLineEdit, QFrame, QFileDialog, QVBoxLayout, QApplication
 
 import qdialog_screenshot
-from constant_setting import default_args_dict, pyautogui_keyboard_keys, code_command_dict,icon_edit,icon_error,icon_right,error_stylesheet_border
-
-def print_function_info(model: str = 'current'):
-    """打印当前/上一个执行的函数信息
-    传参：model 'current'或'last'"""
-    import time
-    import inspect
-
-    if model == 'current':
-        print(time.strftime('%H:%M:%S ', time.localtime()),
-              inspect.getframeinfo(inspect.currentframe().f_back).function)
-    elif model == 'last':
-        print(time.strftime('%H:%M:%S ', time.localtime()),
-              inspect.getframeinfo(inspect.currentframe().f_back.f_back).function)
+from constant_setting import default_args_dict, pyautogui_keyboard_keys, command_link_dict, icon_edit, \
+    error_stylesheet_border
 
 
-
-
-def check_filename_feasible(filename: str, replace:bool=False) ->Union[str, bool]:
+def check_filename_feasible(filename: str, replace: bool = False) -> Union[str, bool]:
     """检查文件名是否符合Windows规范
     传参:
     filename 仅文件名（不含路径）
@@ -55,32 +41,36 @@ def check_filename_feasible(filename: str, replace:bool=False) ->Union[str, bool
 
         return filename.strip()
 
-def convert_args_dict(args_dict_config:dict):
+
+def convert_args_dict(args_dict_config: dict):
     """转换config中的args_dict为widget的对应格式"""
     args_dict_convert = {}
     for key in args_dict_config:
-        # 大部分是原名前+default_
         value_str = args_dict_config[key]
-        print(f'value_str {value_str}')
-
         try:
             value = eval(f'{value_str}')  # 转换文本为对应格式
         except NameError:  # 如果原本就是str，则使用eval后会报错
             value = value_str
         except:
             value = value_str
-        args_dict_convert[f'default_{key}'] = value
+
         # 处理特殊的几个
-        if key == 'distance':
-            if value < 0:
-                args_dict_convert['default_direction'] = '向下'
-                args_dict_convert[f'default_{key}'] = -value
-        if key == 'wait_time':
-            if type(value) is tuple:
-                args_dict_convert['default_wait_time_min']=value[0]
-                args_dict_convert['default_wait_time_max']=value[1]
+        if key == 'distance' and value < 0:
+            args_dict_convert['default_direction'] = '向下'
+            args_dict_convert[f'default_{key}'] = -value
+            continue
+        if key == 'wait_time' and type(value) is tuple:
+            args_dict_convert['default_wait_time_min'] = value[0]
+            args_dict_convert['default_wait_time_max'] = value[1]
+            continue
+        if key == 'command_type':
+            args_dict_convert[key] = value
+            continue
+        # 其余的都是原名前+default_
+        args_dict_convert[f'default_{key}'] = value
 
     return args_dict_convert
+
 
 class DropLabel(QLabel):
     """自定义QLabel控件
@@ -154,7 +144,8 @@ def create_random_string(length: int):
 
 class WidgetInstructLine(QWidget):
     """整个指令控件组"""
-    signal_send_args=Signal(dict)  # 子控件信号的中转发送
+    signal_send_args = Signal(dict)  # 子控件信号的中转发送
+
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
@@ -180,7 +171,7 @@ class WidgetInstructLine(QWidget):
         self.horizontalLayout.addWidget(self.toolButton_delete_instruct)
 
         self.comboBox_select_command = QComboBox()
-        self.comboBox_select_command.addItems(list(code_command_dict.keys()))
+        self.comboBox_select_command.addItems(list(command_link_dict.keys()))
         self.horizontalLayout.addWidget(self.comboBox_select_command)
 
         self.widget_command_setting = QWidget()
@@ -197,25 +188,22 @@ class WidgetInstructLine(QWidget):
         """
         self.comboBox_select_command.currentTextChanged.connect(self.select_command)
 
-
         """
         初始化
         """
         self.args_dict_config = args_dict_config
 
-
-
         if self.args_dict_config:  # 根据传入字典中的项，自动创建对应控件
             current_command = self.args_dict_config['command_type']
             self.args_dict_config = convert_args_dict(self.args_dict_config)  # 转换格式
             self.comboBox_select_command.setCurrentText(current_command)
-
-
+            self.select_command(current_command)  # 手动执行一次，防止当前项与默认项为同一个而不触发更新信号
 
     def select_command(self, command: str):
         """选择命令"""
-        print(f'传递给特定控件的参数 {self.args_dict_config}')
-        self.child_widget_command = eval(f"{code_command_dict[command]['widget']}(self.args_dict_config)")  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
+        print(f'传递给子控件的参数 {self.args_dict_config}')
+        self.child_widget_command = eval(
+            f"{command_link_dict[command]['widget']}(self.args_dict_config)")  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
         layout = self.widget_command_setting.layout()  # 获取对应控件组中用于存放不同命令控件的控件的布局
 
         while layout.count():  # 先清空布局中的原有控件
@@ -231,8 +219,9 @@ class WidgetInstructLine(QWidget):
 
     def get_command_signal(self, args_dict):
         """获取子控件的信号，并发送"""
-        print(f'获取子控件的信号 {args_dict}')
+        print(f'子控件传回的参数 {args_dict}')
         self.signal_send_args.emit(args_dict)
+
 
 class command_widget_move_mouse_to_position(QWidget):
     signal_args = Signal(dict)
@@ -240,28 +229,19 @@ class command_widget_move_mouse_to_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_duration = default_args_dict['max_duration']
-        default_duration = default_args_dict['default_duration']
-        max_x = default_args_dict['max_x']
-        default_x = default_args_dict['default_x']
-        max_y = default_args_dict['max_y']
-        default_y = default_args_dict['default_y']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_command_most = f"""{key}={value}"""
-                exec_command_str = f"""{key}='{value}'"""
-                try:# 备忘录 测试中
-                    exec(f'default_args_dict[{key}]=[{value}]')
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_command_str)
-                except:
-                    pass
-                print(f'修改参数 {exec_command_most}')
-        print(default_x)
+                default_args_dict_copy[key] = value
+        max_duration = default_args_dict_copy['max_duration']
+        default_duration = default_args_dict_copy['default_duration']
+        max_x = default_args_dict_copy['max_x']
+        default_x = default_args_dict_copy['default_x']
+        max_y = default_args_dict_copy['max_y']
+        default_y = default_args_dict_copy['default_y']
 
         """
         ui设置
@@ -351,25 +331,20 @@ class command_widget_drag_mouse_to_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_duration = default_args_dict['max_duration']
-        default_duration = default_args_dict['default_duration']
-        max_x = default_args_dict['max_x']
-        default_x = default_args_dict['default_x']
-        max_y = default_args_dict['max_y']
-        default_y = default_args_dict['default_y']
-        default_button = default_args_dict['default_button']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_duration = args_dict_config['max_duration']
+        default_duration = args_dict_config['default_duration']
+        max_x = args_dict_config['max_x']
+        default_x = args_dict_config['default_x']
+        max_y = args_dict_config['max_y']
+        default_y = args_dict_config['default_y']
+        default_button = args_dict_config['default_button']
 
         """
         ui设置
@@ -471,23 +446,18 @@ class command_widget_mouse_click(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_button = default_args_dict['default_button']
-        default_clicks = default_args_dict['default_clicks']
-        max_clicks = default_args_dict['max_clicks']
-        max_interval = default_args_dict['max_interval']
-        default_interval = default_args_dict['default_interval']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_button = default_args_dict_copy['default_button']
+        default_clicks = default_args_dict_copy['default_clicks']
+        max_clicks = default_args_dict_copy['max_clicks']
+        max_interval = default_args_dict_copy['max_interval']
+        default_interval = default_args_dict_copy['default_interval']
 
         """
         ui设置
@@ -563,19 +533,14 @@ class command_widget_mouse_down(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_button = default_args_dict['default_button']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_button = default_args_dict_copy['default_button']
 
         """
         ui设置
@@ -628,19 +593,14 @@ class command_widget_mouse_up(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_button = default_args_dict['default_button']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_button = default_args_dict_copy['default_button']
 
         """
         ui设置
@@ -689,20 +649,15 @@ class command_widget_mouse_scroll(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_direction = default_args_dict['default_direction']
-        default_distance = default_args_dict['default_distance']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_direction = default_args_dict_copy['default_direction']
+        default_distance = default_args_dict_copy['default_distance']
 
         """
         ui设置
@@ -752,7 +707,8 @@ class command_widget_mouse_scroll(QWidget):
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        distance = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText() == '向上' else -self.spinBox_scroll_distance.value()
+        distance = + self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText() == '向上' \
+            else - self.spinBox_scroll_distance.value()
 
         args_dict = {'right_args': right_args,
                      'distance': distance}
@@ -766,21 +722,16 @@ class command_widget_press_text(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_interval = default_args_dict['max_interval']
-        default_interval = default_args_dict['default_interval']
-        default_message = default_args_dict['default_message']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_interval = default_args_dict_copy['max_interval']
+        default_interval = default_args_dict_copy['default_interval']
+        default_message = default_args_dict_copy['default_message']
 
         """
         ui设置
@@ -842,21 +793,16 @@ class command_widget_press_keys(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_interval = default_args_dict['max_interval']
-        default_interval = default_args_dict['default_interval']
-        default_keys = default_args_dict['default_keys']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_interval = default_args_dict_copy['max_interval']
+        default_interval = default_args_dict_copy['default_interval']
+        default_keys = default_args_dict_copy['default_keys']
 
         """
         ui设置
@@ -947,19 +893,14 @@ class command_widget_press_hotkey(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_hotkeys = default_args_dict['default_hotkeys']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_hotkeys = default_args_dict_copy['default_hotkeys']
 
         """
         ui设置
@@ -1025,19 +966,14 @@ class command_widget_press_down_key(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_key = default_args_dict['default_key']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_key = default_args_dict_copy['default_key']
 
         """
         ui设置
@@ -1100,19 +1036,14 @@ class command_widget_press_up_key(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_key = default_args_dict['default_key']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_key = default_args_dict_copy['default_key']
 
         """
         ui设置
@@ -1175,19 +1106,14 @@ class command_widget_screenshot_fullscreen(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_pic_file = default_args_dict['default_pic_file']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_pic_file = default_args_dict_copy['default_pic_file']
 
         """
         ui设置
@@ -1237,7 +1163,7 @@ class command_widget_screenshot_fullscreen(QWidget):
         if pic_file_name:
             pic_file_suffix = '.png'
         else:
-            pic_file_suffix=''
+            pic_file_suffix = ''
         pic_file = pic_file_name + pic_file_suffix
 
         args_dict = {'right_args': right_args,
@@ -1252,22 +1178,17 @@ class command_widget_screenshot_area(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_x = default_args_dict['max_x']
-        max_y = default_args_dict['max_y']
-        default_area = default_args_dict['default_area']
-        default_pic_file = default_args_dict['default_pic_file']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_x = default_args_dict_copy['max_x']
+        max_y = default_args_dict_copy['max_y']
+        default_area = default_args_dict_copy['default_area']
+        default_pic_file = default_args_dict_copy['default_pic_file']
 
         """
         ui设置
@@ -1424,22 +1345,17 @@ class command_widget_move_to_pic_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_duration = default_args_dict['max_duration']
-        default_duration = default_args_dict['default_duration']
-        default_pic_file = default_args_dict['default_pic_file']
-        default_find_model= default_args_dict['default_find_model']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_duration = default_args_dict_copy['max_duration']
+        default_duration = default_args_dict_copy['default_duration']
+        default_pic_file = default_args_dict_copy['default_pic_file']
+        default_find_model = default_args_dict_copy['default_find_model']
 
         """
         ui设置
@@ -1545,8 +1461,7 @@ class command_widget_move_to_pic_position(QWidget):
         if y_start > y_end:  # pyautogui的截图只支持正数，所以需要调换
             y_start, y_end = y_end, y_start
 
-        format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
-        print(f'截图区域 {format_area}')
+        format_area = (x_start, y_start, x_end - x_start, y_end - y_start)
 
         save_pic_file = f'config/{create_random_string(16)}.png'
         pyautogui.screenshot(save_pic_file, region=format_area)
@@ -1588,27 +1503,22 @@ class command_widget_click_pic_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        max_duration = default_args_dict['max_duration']
-        default_duration = default_args_dict['default_duration']
-        default_button = default_args_dict['default_button']
-        default_clicks = default_args_dict['default_clicks']
-        max_clicks = default_args_dict['max_clicks']
-        max_interval = default_args_dict['max_interval']
-        default_interval = default_args_dict['default_interval']
-        default_pic_file = default_args_dict['default_pic_file']
-        default_find_model = default_args_dict['default_find_model']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        max_duration = default_args_dict_copy['max_duration']
+        default_duration = default_args_dict_copy['default_duration']
+        default_button = default_args_dict_copy['default_button']
+        default_clicks = default_args_dict_copy['default_clicks']
+        max_clicks = default_args_dict_copy['max_clicks']
+        max_interval = default_args_dict_copy['max_interval']
+        default_interval = default_args_dict_copy['default_interval']
+        default_pic_file = default_args_dict_copy['default_pic_file']
+        default_find_model = default_args_dict_copy['default_find_model']
 
         """
         ui设置
@@ -1767,8 +1677,7 @@ class command_widget_click_pic_position(QWidget):
         if y_start > y_end:  # pyautogui的截图只支持正数，所以需要调换
             y_start, y_end = y_end, y_start
 
-        format_area = [x_start, y_start, x_end - x_start, y_end - y_start]
-        print(f'截图区域 {format_area}')
+        format_area = (x_start, y_start, x_end - x_start, y_end - y_start)
 
         save_pic_file = f'config/{create_random_string(16)}.png'
         pyautogui.screenshot(save_pic_file, region=format_area)
@@ -1816,19 +1725,14 @@ class command_widget_wait(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_wait_time = default_args_dict['default_wait_time']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_wait_time = default_args_dict_copy['default_wait_time']
 
         """
         ui设置
@@ -1877,20 +1781,15 @@ class command_widget_wait_random(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        获取初始参数值
+        提取初始参数值
         """
-        default_wait_time_min = default_args_dict['default_wait_time_min']
-        default_wait_time_max = default_args_dict['default_wait_time_max']
-
+        default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                try:
-                    exec(f"{key}={value}")
-                except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(f"{key}='{value}'")
-                except:
-                    pass
+                default_args_dict_copy[key] = value
+        default_wait_time_min = default_args_dict_copy['default_wait_time_min']
+        default_wait_time_max = default_args_dict_copy['default_wait_time_max']
 
         """
         ui设置
@@ -1939,13 +1838,10 @@ class command_widget_wait_random(QWidget):
 
         wait_time_min = self.doubleSpinBox_wait_time_min.value()
         wait_time_max = self.doubleSpinBox_wait_time_max.value()
-        wait_time = (wait_time_min,wait_time_max)
-
+        wait_time = (wait_time_min, wait_time_max)
 
         args_dict = {'right_args': right_args,
                      'wait_time': wait_time}
-
-        print(f'等待参数传递字典 {args_dict}')
 
         self.signal_args.emit(args_dict)
 

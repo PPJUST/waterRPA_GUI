@@ -1,6 +1,6 @@
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-from PySide2.QtWidgets import *
+from PySide2.QtCore import Qt, QRect, Signal, QSize, QPoint
+from PySide2.QtGui import QPen, QPainter, QColor
+from PySide2.QtWidgets import QWidget, QDialog, QVBoxLayout, QDesktopWidget, QApplication
 
 
 class FrameSelectWidget(QWidget):
@@ -17,7 +17,6 @@ class FrameSelectWidget(QWidget):
         self.state_is_selecting = False  # 框选状态
         self.start_pos = None  # 开始坐标
         self.end_pos = None  # 结束坐标
-
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:  # 左键按下的操作
@@ -46,10 +45,6 @@ class FrameSelectWidget(QWidget):
             self.start_pos = None
             self.end_pos = None
             self.update()
-
-
-
-
 
     def get_selection_rect(self):
         if self.start_pos != self.end_pos:
@@ -89,26 +84,23 @@ class QDialogScreenshot(QDialog):
         layout = QVBoxLayout()
         self.setLayout(layout)
 
-        layout.setContentsMargins(0,0,0,0)
+        layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         widget = FrameSelectWidget()
         widget.signal_frame_area.connect(self.get_signal_frame)
         widget.signal_frame_right_click.connect(self.close)
         layout.addWidget(widget)
 
-
-    def get_signal_frame(self, frame_area:list):
+    def get_signal_frame(self, frame_area: list):
         self.signal_screenshot_area.emit(frame_area)
         # self.close()  # 退出截图，最好在外部退出，不然会将遮罩也截屏进去
 
 
-
-
 def _test():
-    app = QApplication([])
+    QApplication([])
     dialog = QDialogScreenshot()
     dialog.exec_()
 
+
 if __name__ == '__main__':
     _test()
-
