@@ -3,7 +3,7 @@
 """
 import os
 import random
-
+from typing import Union
 import filetype
 import pyautogui
 from PySide2.QtCore import *
@@ -11,85 +11,76 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 import qdialog_screenshot
+from constant_setting import *
 
-"""
-定义常量
-"""
-# 对应字典设计 combox项:{function:对应函数, widget:对应控件}
-# 第一个元素留空，用于初始显示
-code_command_dict = {'': {'function': '', 'widget': ''},
-'鼠标操作-移动':{'function':'instruct_mouse.move_mouse_to_position(x=x,y=y,duration=duration)','widget':'command_widget_move_mouse_to_position'},
-'鼠标操作-按下并拖拽':{'function':'instruct_mouse.drag_mouse_to_position(x=x,y=y,button=button,duration=duration)','widget':'command_widget_drag_mouse_to_position'},
-'鼠标操作-点击':{'function':'instruct_mouse.mouse_click(x=x,y=y,button=button,clicks=clicks,interval=interval,duration=duration)','widget':'command_widget_mouse_click'},
-'鼠标操作-按下(不释放)':{'function':'instruct_mouse.mouse_down(x=x,y=y,button=button,duration=duration)','widget':'command_widget_mouse_down'},
-'鼠标操作-释放':{'function':'instruct_mouse.mouse_up(x=x,y=y,button=button,duration=duration)','widget':'command_widget_mouse_up'},
-'鼠标操作-滚动滚轮':{'function':'instruct_mouse.mouse_scroll(x=x,y=y,distance=distance)','widget':'command_widget_mouse_scroll'},
-'键盘操作-输入文本':{'function':'instruct_keyboard.press_text(message=message,interval=interval)','widget':'command_widget_press_text'},
-'键盘操作-敲击':{'function':'instruct_keyboard.press_keys(keys=keys,presses=presses,interval=interval)','widget':'command_widget_press_keys'},
-'键盘操作-使用热键':{'function':'instruct_keyboard.press_hotkey(hotkeys=hotkeys)','widget':'command_widget_press_hotkey'},
-'键盘操作-按下(不释放)':{'function':'instruct_keyboard.press_down_key(key=key)','widget':'command_widget_press_down_key'},
-'键盘操作-释放':{'function':'instruct_keyboard.press_up_key(key=key)','widget':'command_widget_press_up_key'},
-'图像操作-全屏截图':{'function':'instruct_pic.screenshot_fullscreen(pic_file=pic_file)','widget':'command_widget_screenshot_fullscreen'},
-'图像操作-区域截图':{'function':'instruct_pic.screenshot_area(pic_file=pic_file,area=area)','widget':'command_widget_screenshot_area'},
-'图像操作-匹配图片并移动':{'function':'instruct_pic.move_to_pic_position(pic_file=pic_file,duration=duration,find_model=find_model)','widget':'command_widget_move_to_pic_position'},
-'图像操作-匹配图片并点击':{'function':'instruct_pic.click_pic_position(clicks=clicks,button=button,pic_file=pic_file,interval=interval,duration=duration,find_model=find_model)','widget':'command_widget_click_pic_position'},
-'其他-等待时间':{'function':'instruct_custom.wait(wait_time=wait_time)','widget':'command_widget_wait'},
-'其他-等待时间（区间随机）':{'function':'instruct_custom.wait(wait_time=wait_time)','widget':'command_widget_wait_random'}}
+def print_function_info(model: str = 'current'):
+    """打印当前/上一个执行的函数信息
+    传参：model 'current'或'last'"""
+    import time
+    import inspect
+
+    if model == 'current':
+        print(time.strftime('%H:%M:%S ', time.localtime()),
+              inspect.getframeinfo(inspect.currentframe().f_back).function)
+    elif model == 'last':
+        print(time.strftime('%H:%M:%S ', time.localtime()),
+              inspect.getframeinfo(inspect.currentframe().f_back.f_back).function)
 
 
-pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.',
-                           '/', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ':', ';', '<', '=', '>', '?', '@',
-                           '[', '\\', ']', '^', '_', '`', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                           'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '|', '}', '~',
-                           'accept', 'add', 'alt', 'altleft', 'altright', 'apps', 'backspace', 'browserback',
-                           'browserfavorites', 'browserforward', 'browserhome', 'browserrefresh', 'browsersearch',
-                           'browserstop', 'capslock', 'clear', 'convert', 'ctrl', 'ctrlleft', 'ctrlright', 'decimal',
-                           'del', 'delete', 'divide', 'down', 'end', 'enter', 'esc', 'escape', 'execute', 'f1', 'f10',
-                           'f11', 'f12', 'f13', 'f14', 'f15', 'f16', 'f17', 'f18', 'f19', 'f2', 'f20', 'f21', 'f22',
-                           'f23', 'f24', 'f3', 'f4', 'f5', 'f6', 'f7', 'f8', 'f9', 'final', 'fn', 'hanguel', 'hangul',
-                           'hanja', 'help', 'home', 'insert', 'junja', 'kana', 'kanji', 'launchapp1', 'launchapp2',
-                           'launchmail', 'launchmediaselect', 'left', 'modechange', 'multiply', 'nexttrack',
-                           'nonconvert', 'num0', 'num1', 'num2', 'num3', 'num4', 'num5', 'num6', 'num7', 'num8', 'num9',
-                           'numlock', 'pagedown', 'pageup', 'pause', 'pgdn', 'pgup', 'playpause', 'prevtrack', 'print',
-                           'printscreen', 'prntscrn', 'prtsc', 'prtscr', 'return', 'right', 'scrolllock', 'select',
-                           'separator', 'shift', 'shiftleft', 'shiftright', 'sleep', 'space', 'stop', 'subtract', 'tab',
-                           'up', 'volumedown', 'volumemute', 'volumeup', 'win', 'winleft', 'winright', 'yen', 'command',
-                           'option', 'optionleft', 'optionright']
 
 
-def check_filename_feasible(filename: str) -> bool:
+def check_filename_feasible(filename: str, replace:bool=False) ->Union[str, bool]:
     """检查文件名是否符合Windows规范
-    传参: filename 仅文件名（不含路径）"""
+    传参:
+    filename 仅文件名（不含路径）
+    replace 是否替换非法字符"""
     # 官方文档：文件和文件夹不能命名为“.”或“..”，也不能包含以下任何字符: # % & * | \ : " < > ?/
-    # 检查.
-    if filename[0] == '.':
-        return False
-
-    # 检查# % & * | \ : " < > ?/
     except_word = [':', '#', '%', '&', '*', '|', '\\', ':', '"', '<', '>', '?', '/']
-    for key in except_word:
-        if key in filename:
+    if not replace:  # 不替换时，仅检查
+        # 检查.
+        if filename[0] == '.':
             return False
 
-    return True
+        # 检查# % & * | \ : " < > ?/
 
+        for key in except_word:
+            if key in filename:
+                return False
+        return True
+    else:
+        for word in except_word:
+            filename = filename.replace(word, '')
+        while filename[0] == '.':
+            filename = filename[1:]
 
-default_duration: float = 0.25  # 默认移动所需时间
-max_duration: float = 9999.99  # 移动所需时间的最大值限制
-default_presses: int = 1  # 默认重复次数
-default_clicks: int = 1  # 默认点击次数
-max_clicks: int = 9  # 点击次数的最大值限制
-default_interval: float = 0.1  # 默认每次点击间隔时间
-max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
-max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
-default_wait_time = 1  # 默认等待时间
+        return filename.strip()
 
-icon_edit = r'icon/edit.png'
-icon_error = r'icon/error.png'
-icon_right = r'icon/right.png'
+def convert_args_dict(args_dict_config:dict):
+    """转换config中的args_dict为widget的对应格式"""
+    args_dict_convert = {}
+    for key in args_dict_config:
+        # 大部分是原名前+default_
+        value_str = args_dict_config[key]
+        print(f'value_str {value_str}')
 
-error_stylesheet_border = 'border: 1px solid red;'
+        try:
+            value = eval(f'{value_str}')  # 转换文本为对应格式
+        except NameError:  # 如果原本就是str，则使用eval后会报错
+            value = value_str
+        except:
+            value = value_str
+        args_dict_convert[f'default_{key}'] = value
+        # 处理特殊的几个
+        if key == 'distance':
+            if value < 0:
+                args_dict_convert['default_direction'] = '向下'
+                args_dict_convert[f'default_{key}'] = -value
+        if key == 'wait_time':
+            if type(value) is tuple:
+                args_dict_convert['default_wait_time_min']=value[0]
+                args_dict_convert['default_wait_time_max']=value[1]
 
+    return args_dict_convert
 
 class DropLabel(QLabel):
     """自定义QLabel控件
@@ -164,9 +155,11 @@ def create_random_string(length: int):
 class WidgetInstructLine(QWidget):
     """整个指令控件组"""
     signal_send_args=Signal(dict)  # 子控件信号的中转发送
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
-        # 初始化
+        """
+        ui设置
+        """
         self.horizontalLayout = QHBoxLayout(self)
         self.horizontalLayout.setSpacing(3)
         self.horizontalLayout.setContentsMargins(3, 3, 3, 3)
@@ -188,8 +181,6 @@ class WidgetInstructLine(QWidget):
 
         self.comboBox_select_command = QComboBox()
         self.comboBox_select_command.addItems(list(code_command_dict.keys()))
-        # self.comboBox_select_command.setMinimumWidth(80)
-        # self.comboBox_select_command.setMaximumWidth(80)
         self.horizontalLayout.addWidget(self.comboBox_select_command)
 
         self.widget_command_setting = QWidget()
@@ -201,12 +192,30 @@ class WidgetInstructLine(QWidget):
 
         self.horizontalLayout.setStretch(4, 1)
 
-        # 连接槽函数
+        """
+        槽函数设置
+        """
         self.comboBox_select_command.currentTextChanged.connect(self.select_command)
+
+
+        """
+        初始化
+        """
+        self.args_dict_config = args_dict_config
+
+
+
+        if self.args_dict_config:  # 根据传入字典中的项，自动创建对应控件
+            current_command = self.args_dict_config['command_type']
+            self.args_dict_config = convert_args_dict(self.args_dict_config)  # 转换格式
+            self.comboBox_select_command.setCurrentText(current_command)
+
+
 
     def select_command(self, command: str):
         """选择命令"""
-        value_widget = eval(f"{code_command_dict[command]['widget']}()")  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
+        print(f'传递给特定控件的参数 {self.args_dict_config}')
+        self.child_widget_command = eval(f"{code_command_dict[command]['widget']}(self.args_dict_config)")  # 利用字典获取不同命令对应的控件，并利用eval将字符串转换为对象
         layout = self.widget_command_setting.layout()  # 获取对应控件组中用于存放不同命令控件的控件的布局
 
         while layout.count():  # 先清空布局中的原有控件
@@ -215,20 +224,40 @@ class WidgetInstructLine(QWidget):
             if widget:
                 widget.deleteLater()
 
-        if value_widget:
-            layout.addWidget(value_widget)
-            value_widget.signal_args.connect(self.get_command_signal)
-            value_widget.send_args()  # 执行一次子控件的发送信号函数，用于发送初始数据
+        if self.child_widget_command:
+            layout.addWidget(self.child_widget_command)
+            self.child_widget_command.signal_args.connect(self.get_command_signal)
+            self.child_widget_command.send_args()  # 执行一次子控件的发送信号函数，用于发送初始数据
 
     def get_command_signal(self, args_dict):
         """获取子控件的信号，并发送"""
+        print(f'获取子控件的信号 {args_dict}')
         self.signal_send_args.emit(args_dict)
 
 class command_widget_move_mouse_to_position(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -251,6 +280,7 @@ class command_widget_move_mouse_to_position(QWidget):
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_x.setMaximum(max_x)
+        self.spinBox_x.setValue(default_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_3 = QLabel()
@@ -260,6 +290,7 @@ class command_widget_move_mouse_to_position(QWidget):
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_y.setMaximum(max_y)
+        self.spinBox_y.setValue(default_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_4 = QLabel()
@@ -312,8 +343,27 @@ class command_widget_move_mouse_to_position(QWidget):
 class command_widget_drag_mouse_to_position(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -325,6 +375,7 @@ class command_widget_drag_mouse_to_position(QWidget):
 
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
         self.horizontalLayout.addWidget(self.comboBox_button)
 
         self.label_2 = QLabel()
@@ -344,6 +395,7 @@ class command_widget_drag_mouse_to_position(QWidget):
         self.spinBox_x = QSpinBox()
         self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_x.setMaximum(max_x)
+        self.spinBox_x.setValue(default_x)
         self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_4 = QLabel()
@@ -353,6 +405,7 @@ class command_widget_drag_mouse_to_position(QWidget):
         self.spinBox_y = QSpinBox()
         self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_y.setMaximum(max_y)
+        self.spinBox_y.setValue(default_y)
         self.horizontalLayout.addWidget(self.spinBox_y)
 
         self.label_5 = QLabel()
@@ -408,47 +461,39 @@ class command_widget_drag_mouse_to_position(QWidget):
 class command_widget_mouse_click(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
         self.horizontalLayout = QHBoxLayout(self)
 
-        self.label_2 = QLabel()
-        self.label_2.setText('使用')
-        self.horizontalLayout.addWidget(self.label_2)
-
-        self.doubleSpinBox_duration = QDoubleSpinBox()
-        self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(max_duration)
-        self.doubleSpinBox_duration.setValue(default_duration)
-        self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
-
-        self.label_3 = QLabel()
-        self.label_3.setText('秒，移动至 (x:')
-        self.horizontalLayout.addWidget(self.label_3)
-
-        self.spinBox_x = QSpinBox()
-        self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(max_x)
-        self.horizontalLayout.addWidget(self.spinBox_x)
-
-        self.label_4 = QLabel()
-        self.label_4.setText(',y:')
-        self.horizontalLayout.addWidget(self.label_4)
-
-        self.spinBox_y = QSpinBox()
-        self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(max_y)
-        self.horizontalLayout.addWidget(self.spinBox_y)
-
         self.label_5 = QLabel()
-        self.label_5.setText(')，并点击')
+        self.label_5.setText('点击')
         self.horizontalLayout.addWidget(self.label_5)
 
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
         self.horizontalLayout.addWidget(self.comboBox_button)
 
         self.spinBox_clicks = QSpinBox()
@@ -474,48 +519,30 @@ class command_widget_mouse_click(QWidget):
         """
         初始化
         """
-        self.right_args = False
+        self.right_args = True
         self.check_args()
         self.send_args()
 
         """
         槽函数设置
         """
-        self.spinBox_x.valueChanged.connect(self.check_args)
-        self.spinBox_y.valueChanged.connect(self.check_args)
-
-        self.spinBox_x.valueChanged.connect(self.send_args)
-        self.spinBox_y.valueChanged.connect(self.send_args)
-        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
         self.comboBox_button.currentTextChanged.connect(self.send_args)
         self.doubleSpinBox_interval.valueChanged.connect(self.send_args)
         self.spinBox_clicks.valueChanged.connect(self.send_args)
 
     def check_args(self):
         """检查参数规范"""
-        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
-            self.right_args = False
-            self.spinBox_x.setStyleSheet(error_stylesheet_border)
-            self.spinBox_y.setStyleSheet(error_stylesheet_border)
-        else:
-            self.right_args = True
-            self.spinBox_x.setStyleSheet('')
-            self.spinBox_y.setStyleSheet('')
+        pass
 
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        x = self.spinBox_x.value()
-        y = self.spinBox_y.value()
-        duration = self.doubleSpinBox_duration.value()
+
         button = self.comboBox_button.currentText()
         interval = self.doubleSpinBox_interval.value()
         clicks = self.spinBox_clicks.value()
 
         args_dict = {'right_args': right_args,
-                     'x': x,
-                     'y': y,
-                     'duration': duration,
                      'button': button,
                      'interval': interval,
                      'clicks': clicks}
@@ -526,47 +553,39 @@ class command_widget_mouse_click(QWidget):
 class command_widget_mouse_down(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
         self.horizontalLayout = QHBoxLayout(self)
 
-        self.label_2 = QLabel()
-        self.label_2.setText('使用')
-        self.horizontalLayout.addWidget(self.label_2)
-
-        self.doubleSpinBox_duration = QDoubleSpinBox()
-        self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(max_duration)
-        self.doubleSpinBox_duration.setValue(default_duration)
-        self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
-
-        self.label_3 = QLabel()
-        self.label_3.setText('秒，移动至 (x:')
-        self.horizontalLayout.addWidget(self.label_3)
-
-        self.spinBox_x = QSpinBox()
-        self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(max_x)
-        self.horizontalLayout.addWidget(self.spinBox_x)
-
-        self.label_4 = QLabel()
-        self.label_4.setText(',y:')
-        self.horizontalLayout.addWidget(self.label_4)
-
-        self.spinBox_y = QSpinBox()
-        self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(max_y)
-        self.horizontalLayout.addWidget(self.spinBox_y)
-
         self.label_5 = QLabel()
-        self.label_5.setText(')，然后按下')
+        self.label_5.setText('按下')
         self.horizontalLayout.addWidget(self.label_5)
 
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
         self.horizontalLayout.addWidget(self.comboBox_button)
 
         self.label_6 = QLabel()
@@ -576,44 +595,25 @@ class command_widget_mouse_down(QWidget):
         """
         初始化
         """
-        self.right_args = False
+        self.right_args = True
         self.check_args()
         self.send_args()
 
         """
         槽函数设置
         """
-        self.spinBox_x.valueChanged.connect(self.check_args)
-        self.spinBox_y.valueChanged.connect(self.check_args)
-
-        self.spinBox_x.valueChanged.connect(self.send_args)
-        self.spinBox_y.valueChanged.connect(self.send_args)
-        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
         self.comboBox_button.currentTextChanged.connect(self.send_args)
 
     def check_args(self):
         """检查参数规范"""
-        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
-            self.right_args = False
-            self.spinBox_x.setStyleSheet(error_stylesheet_border)
-            self.spinBox_y.setStyleSheet(error_stylesheet_border)
-        else:
-            self.right_args = True
-            self.spinBox_x.setStyleSheet('')
-            self.spinBox_y.setStyleSheet('')
+        pass
 
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        x = self.spinBox_x.value()
-        y = self.spinBox_y.value()
-        duration = self.doubleSpinBox_duration.value()
         button = self.comboBox_button.currentText()
 
         args_dict = {'right_args': right_args,
-                     'x': x,
-                     'y': y,
-                     'duration': duration,
                      'button': button}
 
         self.signal_args.emit(args_dict)
@@ -622,90 +622,63 @@ class command_widget_mouse_down(QWidget):
 class command_widget_mouse_up(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
         self.horizontalLayout = QHBoxLayout(self)
 
-        self.label_2 = QLabel()
-        self.label_2.setText('使用')
-        self.horizontalLayout.addWidget(self.label_2)
-
-        self.doubleSpinBox_duration = QDoubleSpinBox()
-        self.doubleSpinBox_duration.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.doubleSpinBox_duration.setMaximum(max_duration)
-        self.doubleSpinBox_duration.setValue(default_duration)
-        self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
-
-        self.label_3 = QLabel()
-        self.label_3.setText('秒，移动至 (x:')
-        self.horizontalLayout.addWidget(self.label_3)
-
-        self.spinBox_x = QSpinBox()
-        self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(max_x)
-        self.horizontalLayout.addWidget(self.spinBox_x)
-
-        self.label_4 = QLabel()
-        self.label_4.setText(',y:')
-        self.horizontalLayout.addWidget(self.label_4)
-
-        self.spinBox_y = QSpinBox()
-        self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(max_y)
-        self.horizontalLayout.addWidget(self.spinBox_y)
-
         self.label_5 = QLabel()
-        self.label_5.setText(')，然后释放')
+        self.label_5.setText('释放')
         self.horizontalLayout.addWidget(self.label_5)
 
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
         self.horizontalLayout.addWidget(self.comboBox_button)
 
         """
         初始化
         """
-        self.right_args = False
+        self.right_args = True
         self.check_args()
         self.send_args()
 
         """
         槽函数设置
         """
-        self.spinBox_x.valueChanged.connect(self.check_args)
-        self.spinBox_y.valueChanged.connect(self.check_args)
-
-        self.spinBox_x.valueChanged.connect(self.send_args)
-        self.spinBox_y.valueChanged.connect(self.send_args)
-        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
         self.comboBox_button.currentTextChanged.connect(self.send_args)
 
     def check_args(self):
         """检查参数规范"""
-        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
-            self.right_args = False
-            self.spinBox_x.setStyleSheet(error_stylesheet_border)
-            self.spinBox_y.setStyleSheet(error_stylesheet_border)
-        else:
-            self.right_args = True
-            self.spinBox_x.setStyleSheet('')
-            self.spinBox_y.setStyleSheet('')
+        pass
 
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        x = self.spinBox_x.value()
-        y = self.spinBox_y.value()
-        duration = self.doubleSpinBox_duration.value()
         button = self.comboBox_button.currentText()
 
         args_dict = {'right_args': right_args,
-                     'x': x,
-                     'y': y,
-                     'duration': duration,
                      'button': button}
 
         self.signal_args.emit(args_dict)
@@ -714,37 +687,39 @@ class command_widget_mouse_up(QWidget):
 class command_widget_mouse_scroll(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
         self.horizontalLayout = QHBoxLayout(self)
 
-        self.label_2 = QLabel()
-        self.label_2.setText('在 (x:')
-        self.horizontalLayout.addWidget(self.label_2)
-
-        self.spinBox_x = QSpinBox()
-        self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_x.setMaximum(max_x)
-        self.horizontalLayout.addWidget(self.spinBox_x)
-
-        self.label_3 = QLabel()
-        self.label_3.setText(',y:')
-        self.horizontalLayout.addWidget(self.label_3)
-
-        self.spinBox_y = QSpinBox()
-        self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_y.setMaximum(max_y)
-        self.horizontalLayout.addWidget(self.spinBox_y)
-
         self.label_4 = QLabel()
-        self.label_4.setText(')，使用滚轮')
+        self.label_4.setText('使用滚轮')
         self.horizontalLayout.addWidget(self.label_4)
 
         self.comboBox_scroll_direction = QComboBox()
         self.comboBox_scroll_direction.addItems(['向上', '向下'])
+        self.comboBox_scroll_direction.setCurrentText(default_direction)
         self.horizontalLayout.addWidget(self.comboBox_scroll_direction)
 
         self.label_5 = QLabel()
@@ -754,6 +729,7 @@ class command_widget_mouse_scroll(QWidget):
         self.spinBox_scroll_distance = QSpinBox()
         self.spinBox_scroll_distance.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_scroll_distance.setMaximum(9999)
+        self.spinBox_scroll_distance.setValue(default_distance)
         self.horizontalLayout.addWidget(self.spinBox_scroll_distance)
 
         self.label_6 = QLabel()
@@ -763,43 +739,27 @@ class command_widget_mouse_scroll(QWidget):
         """
         初始化
         """
-        self.right_args = False
+        self.right_args = True
         self.check_args()
         self.send_args()
 
         """
         槽函数设置
         """
-        self.spinBox_x.valueChanged.connect(self.check_args)
-        self.spinBox_y.valueChanged.connect(self.check_args)
-
-        self.spinBox_x.valueChanged.connect(self.send_args)
-        self.spinBox_y.valueChanged.connect(self.send_args)
         self.comboBox_scroll_direction.currentTextChanged.connect(self.send_args)
         self.spinBox_scroll_distance.valueChanged.connect(self.send_args)
 
     def check_args(self):
         """检查参数规范"""
-        if self.spinBox_x.value() == 0 and self.spinBox_y.value() == 0:
-            self.right_args = False
-            self.spinBox_x.setStyleSheet(error_stylesheet_border)
-            self.spinBox_y.setStyleSheet(error_stylesheet_border)
-        else:
-            self.right_args = True
-            self.spinBox_x.setStyleSheet('')
-            self.spinBox_y.setStyleSheet('')
+        pass
 
     def send_args(self):
         """发送参数设置"""
         right_args = self.right_args
-        x = self.spinBox_x.value()
-        y = self.spinBox_y.value()
-        duration = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText() == '向上' else -self.spinBox_scroll_distance.value()
+        distance = +self.spinBox_scroll_distance.value() if self.comboBox_scroll_direction.currentText() == '向上' else -self.spinBox_scroll_distance.value()
 
         args_dict = {'right_args': right_args,
-                     'x': x,
-                     'y': y,
-                     'duration': duration}
+                     'distance': distance}
 
         self.signal_args.emit(args_dict)
 
@@ -807,8 +767,27 @@ class command_widget_mouse_scroll(QWidget):
 class command_widget_press_text(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -820,6 +799,8 @@ class command_widget_press_text(QWidget):
 
         self.lineEdit_message = QLineEdit()
         self.lineEdit_message.setPlaceholderText('输入文本')
+        if default_message:
+            self.lineEdit_message.setText(default_message)
         self.horizontalLayout.addWidget(self.lineEdit_message)
 
         self.label_3 = QLabel()
@@ -864,8 +845,27 @@ class command_widget_press_text(QWidget):
 class command_widget_press_keys(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -877,6 +877,8 @@ class command_widget_press_keys(QWidget):
 
         self.lineEdit_keys = QLineEdit()
         self.lineEdit_keys.setPlaceholderText('指定名称的键，以空格间隔')
+        if default_keys:
+            self.lineEdit_keys.setText(default_keys)
         self.horizontalLayout.addWidget(self.lineEdit_keys)
 
         self.label_3 = QLabel()
@@ -934,6 +936,7 @@ class command_widget_press_keys(QWidget):
 
         keys_split = self.lineEdit_keys.text().split(" ")
         keys = [key for key in keys_split if key.lower() in pyautogui_keyboard_keys]
+        keys = keys if keys else ''  # keys不能设置为[]
 
         presses = self.spinBox_presses.value()
         interval = self.doubleSpinBox_interval.value()
@@ -949,8 +952,27 @@ class command_widget_press_keys(QWidget):
 class command_widget_press_hotkey(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -962,6 +984,8 @@ class command_widget_press_hotkey(QWidget):
 
         self.lineEdit_hotkeys = QLineEdit()
         self.lineEdit_hotkeys.setPlaceholderText('指定名称的键，以空格间隔')
+        if default_hotkeys:
+            self.lineEdit_hotkeys.setText(default_hotkeys)
         self.horizontalLayout.addWidget(self.lineEdit_hotkeys)
 
         self.label_3 = QLabel()
@@ -999,6 +1023,7 @@ class command_widget_press_hotkey(QWidget):
 
         keys_split = self.lineEdit_hotkeys.text().split(" ")
         hotkeys = [key for key in keys_split if key.lower() in pyautogui_keyboard_keys]
+        hotkeys = hotkeys if hotkeys else ''  # hotkeys不能设置为[]
 
         args_dict = {'right_args': right_args,
                      'hotkeys': hotkeys}
@@ -1009,8 +1034,27 @@ class command_widget_press_hotkey(QWidget):
 class command_widget_press_down_key(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1022,6 +1066,8 @@ class command_widget_press_down_key(QWidget):
 
         self.lineEdit_key = QLineEdit()
         self.lineEdit_key.setPlaceholderText('仅支持单键，指定名称的键')
+        if default_key:
+            self.lineEdit_key.setText(default_key)
         self.horizontalLayout.addWidget(self.lineEdit_key)
 
         self.label_3 = QLabel()
@@ -1067,8 +1113,27 @@ class command_widget_press_down_key(QWidget):
 class command_widget_press_up_key(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1080,6 +1145,8 @@ class command_widget_press_up_key(QWidget):
 
         self.lineEdit_key = QLineEdit()
         self.lineEdit_key.setPlaceholderText('仅支持单键，指定名称的键')
+        if default_key:
+            self.lineEdit_key.setText(default_key)
         self.horizontalLayout.addWidget(self.lineEdit_key)
 
         self.label_3 = QLabel()
@@ -1125,8 +1192,27 @@ class command_widget_press_up_key(QWidget):
 class command_widget_screenshot_fullscreen(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1138,6 +1224,8 @@ class command_widget_screenshot_fullscreen(QWidget):
 
         self.lineEdit_pic_file = QLineEdit()
         self.lineEdit_pic_file.setPlaceholderText('输入文件名（不含后缀），如存在则覆盖')
+        if default_pic_file:
+            self.lineEdit_pic_file.setText(default_pic_file)
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
 
         """
@@ -1170,7 +1258,10 @@ class command_widget_screenshot_fullscreen(QWidget):
         right_args = self.right_args
 
         pic_file_name = self.lineEdit_pic_file.text().strip()
-        pic_file_suffix = '.png'
+        if pic_file_name:
+            pic_file_suffix = '.png'
+        else:
+            pic_file_suffix=''
         pic_file = pic_file_name + pic_file_suffix
 
         args_dict = {'right_args': right_args,
@@ -1182,8 +1273,27 @@ class command_widget_screenshot_fullscreen(QWidget):
 class command_widget_screenshot_area(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1196,6 +1306,7 @@ class command_widget_screenshot_area(QWidget):
         self.spinBox_xl = QSpinBox()
         self.spinBox_xl.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_xl.setMaximum(max_x)
+        self.spinBox_xl.setValue(default_area[0])
         self.horizontalLayout.addWidget(self.spinBox_xl)
 
         self.label_3 = QLabel()
@@ -1205,6 +1316,7 @@ class command_widget_screenshot_area(QWidget):
         self.spinBox_yl = QSpinBox()
         self.spinBox_yl.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_yl.setMaximum(max_y)
+        self.spinBox_yl.setValue(default_area[1])
         self.horizontalLayout.addWidget(self.spinBox_yl)
 
         self.label_4 = QLabel()
@@ -1214,6 +1326,7 @@ class command_widget_screenshot_area(QWidget):
         self.spinBox_xr = QSpinBox()
         self.spinBox_xr.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_xr.setMaximum(max_x)
+        self.spinBox_xr.setValue(default_area[2])
         self.horizontalLayout.addWidget(self.spinBox_xr)
 
         self.label_5 = QLabel()
@@ -1223,6 +1336,7 @@ class command_widget_screenshot_area(QWidget):
         self.spinBox_yr = QSpinBox()
         self.spinBox_yr.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.spinBox_yr.setMaximum(max_y)
+        self.spinBox_yr.setValue(default_area[3])
         self.horizontalLayout.addWidget(self.spinBox_yr)
 
         self.label_6 = QLabel()
@@ -1231,6 +1345,8 @@ class command_widget_screenshot_area(QWidget):
 
         self.lineEdit_pic_file = QLineEdit()
         self.lineEdit_pic_file.setPlaceholderText('输入文件名（不含后缀），如存在则覆盖')
+        if default_pic_file:
+            self.lineEdit_pic_file.setText(default_pic_file)
         self.horizontalLayout.addWidget(self.lineEdit_pic_file)
 
         """
@@ -1306,7 +1422,10 @@ class command_widget_screenshot_area(QWidget):
             right_args = False
 
         pic_file_name = self.lineEdit_pic_file.text().strip()
-        pic_file_suffix = '.png'
+        if pic_file_name:
+            pic_file_suffix = '.png'
+        else:
+            pic_file_suffix = ''
         pic_file = pic_file_name + pic_file_suffix
 
         x_1 = self.spinBox_xl.value()
@@ -1327,8 +1446,27 @@ class command_widget_screenshot_area(QWidget):
 class command_widget_move_to_pic_position(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1360,6 +1498,7 @@ class command_widget_move_to_pic_position(QWidget):
 
         self.comboBox_find_model = QComboBox()
         self.comboBox_find_model.addItems(['第一个', '全部'])
+        self.comboBox_find_model.setCurrentText(default_find_model)
         self.horizontalLayout.addWidget(self.comboBox_find_model)
 
         self.label_4 = QLabel()
@@ -1385,6 +1524,9 @@ class command_widget_move_to_pic_position(QWidget):
         self.right_args = False
         self.check_args()
         self.send_args()
+
+        if default_pic_file:
+            self.choose_pic(default_pic_file)
 
         """
         槽函数设置
@@ -1452,7 +1594,9 @@ class command_widget_move_to_pic_position(QWidget):
         """发送参数设置"""
         right_args = self.right_args
 
-        pic_file = self.label_show_pic.property('pic_path')
+        pic_file_property = self.label_show_pic.property('pic_path')
+        pic_file = pic_file_property if pic_file_property else ''  # pic_file不能是None
+
         find_model = self.comboBox_find_model.currentText()
         duration = self.doubleSpinBox_duration.value()
 
@@ -1467,8 +1611,27 @@ class command_widget_move_to_pic_position(QWidget):
 class command_widget_click_pic_position(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1505,6 +1668,7 @@ class command_widget_click_pic_position(QWidget):
 
         self.comboBox_find_model = QComboBox()
         self.comboBox_find_model.addItems(['第一个', '全部'])
+        self.comboBox_find_model.setCurrentText(default_find_model)
         self.horizontalLayout_line1.addWidget(self.comboBox_find_model)
 
         self.label_4 = QLabel()
@@ -1520,6 +1684,7 @@ class command_widget_click_pic_position(QWidget):
 
         self.comboBox_button = QComboBox()
         self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
         self.horizontalLayout_line2.addWidget(self.comboBox_button)
 
         self.spinBox_clicks = QSpinBox()
@@ -1574,6 +1739,9 @@ class command_widget_click_pic_position(QWidget):
         self.right_args = False
         self.check_args()
         self.send_args()
+
+        if default_pic_file:
+            self.choose_pic(default_pic_file)
 
         """
         槽函数设置
@@ -1644,7 +1812,9 @@ class command_widget_click_pic_position(QWidget):
         """发送参数设置"""
         right_args = self.right_args
 
-        pic_file = self.label_show_pic.property('pic_path')
+        pic_file_property = self.label_show_pic.property('pic_path')
+        pic_file = pic_file_property if pic_file_property else ''  # pic_file不能是None
+
         find_model = self.comboBox_find_model.currentText()
         duration = self.doubleSpinBox_duration.value()
         button = self.comboBox_button.currentText()
@@ -1665,8 +1835,27 @@ class command_widget_click_pic_position(QWidget):
 class command_widget_wait(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1711,8 +1900,27 @@ class command_widget_wait(QWidget):
 class command_widget_wait_random(QWidget):
     signal_args = Signal(dict)
 
-    def __init__(self):
+    def __init__(self, args_dict_config=None):
         super().__init__()
+        """
+        将字典项转换为变量，用于更新参数
+        """
+        if args_dict_config:
+            for key in args_dict_config:
+                value = args_dict_config[key]
+                exec_type1 = f"""
+                global {key}
+                {key}={value}"""
+                exec_type2 = f"""
+                global {key}
+                {key}='{value}'"""
+                try:
+                    exec(exec_type1)
+                except NameError:  # 如果原本就是str，则使用exec后会报错
+                    exec(exec_type2)
+                except:
+                    pass
+
         """
         ui设置
         """
@@ -1725,7 +1933,7 @@ class command_widget_wait_random(QWidget):
         self.doubleSpinBox_wait_time_min = QDoubleSpinBox()
         self.doubleSpinBox_wait_time_min.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.doubleSpinBox_wait_time_min.setMaximum(9999.99)
-        self.doubleSpinBox_wait_time_min.setValue(default_wait_time)
+        self.doubleSpinBox_wait_time_min.setValue(default_wait_time_min)
         self.horizontalLayout.addWidget(self.doubleSpinBox_wait_time_min)
 
         self.label_2 = QLabel()
@@ -1735,7 +1943,7 @@ class command_widget_wait_random(QWidget):
         self.doubleSpinBox_wait_time_max = QDoubleSpinBox()
         self.doubleSpinBox_wait_time_max.setButtonSymbols(QAbstractSpinBox.NoButtons)
         self.doubleSpinBox_wait_time_max.setMaximum(9999.99)
-        self.doubleSpinBox_wait_time_max.setValue(default_wait_time)
+        self.doubleSpinBox_wait_time_max.setValue(default_wait_time_max)
         self.horizontalLayout.addWidget(self.doubleSpinBox_wait_time_max)
 
         self.label_3 = QLabel()
@@ -1762,8 +1970,11 @@ class command_widget_wait_random(QWidget):
         wait_time_max = self.doubleSpinBox_wait_time_max.value()
         wait_time = (wait_time_min,wait_time_max)
 
+
         args_dict = {'right_args': right_args,
                      'wait_time': wait_time}
+
+        print(f'等待参数传递字典 {args_dict}')
 
         self.signal_args.emit(args_dict)
 
@@ -1773,7 +1984,7 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = WidgetInstructLine()
+    test = command_widget_mouse_click()
     # -------------
     layout = QVBoxLayout()
     layout.addWidget(test)

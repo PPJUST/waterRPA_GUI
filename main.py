@@ -1,24 +1,14 @@
 import os
+import string
+
+import send2trash
 
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
 import configparser
 
-
-# 备忘录 各种指令用画表的方法统一格式，使得只需要修改一处地方代码就可以统一全部方案
-
-
-
-"""
-定义常量
-"""
-icon_edit = r'icon/edit.png'
-icon_error = r'icon/error.png'
-icon_right = r'icon/right.png'
-
-
-
+from constant_setting import *
 
 class Main(QMainWindow):
     def __init__(self):
@@ -33,19 +23,27 @@ class Main(QMainWindow):
         self.check_default_config()
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
-        self.insert_instruct_line_widgets()  # 生成一个初始控件组
+
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
+        self.load_config_to_comboBox()  # 加载配置文件到comboBox
+        if self.ui.listWidget_instruct_area.count() == 0:
+            self.insert_instruct_line_widgets()  # 生成一个初始控件组
+
         """
         连接信号与槽函数
         """
         # 配置文件区
         self.ui.toolButton_save_config.clicked.connect(self.save_config)
-
+        self.ui.toolButton_add_config.clicked.connect(self.add_config)
+        self.ui.toolButton_delete_config.clicked.connect(self.delete_config)
+        self.ui.comboBox_select_config.currentTextChanged.connect(self.load_instruct)
         # 功能区
         self.ui.pushButton_start.clicked.connect(self.start_instruct)
         self.ui.pushButton_stop.clicked.connect(self.stop_instruct)
 
     def get_args(self,args_dict):
+        """接收传递的信号"""
+        print(f'接收传入的参数：{args_dict}')
         instruct_id = self.sender().property('id')
         self.instruct_setting[instruct_id] = args_dict
 
@@ -57,17 +55,43 @@ class Main(QMainWindow):
                 if not right_args:
                     self.ui.pushButton_start.setEnabled(False)
 
-    def insert_instruct_line_widgets(self):
+    def load_instruct(self):
+        """加载命令行设置"""
+        self.ui.listWidget_instruct_area.clear()
+        current_config = self.ui.comboBox_select_config.currentText()
+        if os.listdir(f'config/{current_config}'):
+            pass
+        config = configparser.ConfigParser()
+        config.read(f'config/{current_config}/setting.ini', encoding='utf-8')  # 配置文件的路径
+        for section in config.sections():
+            args_dict_config = {}
+            keys = config.options(section)
+            for key in keys:
+                args_dict_config[key] = config.get(section, key)
+
+            self.insert_instruct_line_widgets(args_dict_config)
+
+        if  self.ui.listWidget_instruct_area.count() == 0:
+            self.insert_instruct_line_widgets()
+
+
+    def insert_instruct_line_widgets(self, args_dict_config=None):
         """插入指令行控件组
-        传参：sender 即self.sender()"""
+        传参：
+        args_dict_config 指令设置的字典，用于初始化
+        sender 即self.sender()"""
+        print_function_info('last')
         # 计算当前索引
         if self.sender():
             index = self.get_index_of_current_widgets(self.sender())
+            if index is None:
+                index = self.ui.listWidget_instruct_area.count()
         else:
             index = self.ui.listWidget_instruct_area.count()
 
+        print(f'index {index}')
         # 在当前索引后插入新的控件组
-        widget_instruct = WidgetInstructLine()
+        widget_instruct = WidgetInstructLine(args_dict_config)
         id_random = create_random_string(16)
         widget_instruct.setProperty('id', id_random)  # 设置命令行控件组的唯一id
         self.instruct_setting[id_random]={}  # 创建对应的空键值对
@@ -82,7 +106,8 @@ class Main(QMainWindow):
         widget_instruct.toolButton_delete_instruct.clicked.connect(self.delete_instruct_line_widgets)
 
         widget_instruct.signal_send_args.connect(self.get_args)
-
+        if args_dict_config:
+            widget_instruct.child_widget_command.send_args()  # 手工执行一次子控件的发送信号函数，用于初始化
 
 
 
@@ -132,13 +157,10 @@ class Main(QMainWindow):
             # 将字典项转换为变量，用于后续调用函数
             for key in instruct_data:
                 value = instruct_data[key]
-                if type(value) is str:
-                    convert = {'左键':'left', '右键':'right','中键':'middle'}  # 转换为pyautogui支持的文本
-                    if value in convert:
-                        value = convert[value]
-                    exec(f"{key}='{value}'")
-                else:
-                    exec(f'{key}={value}')
+                convert = {'左键':'left', '右键':'right','中键':'middle'}  # 转换为pyautogui支持的文本
+                if value in convert:
+                    value = convert[value]
+                exec(f"{key}='{value}'")
 
             # 调用对应函数，相关变量已使用exec创建
             exec(f'{instruct_funciton}')
@@ -155,6 +177,43 @@ class Main(QMainWindow):
 
         pyautogui.moveTo(0, 0)
 
+    def load_config_to_comboBox(self):
+        """加载配置文件到comboBox中显示"""
+        configs = os.listdir('config')
+        try:
+            self.ui.comboBox_select_config.currentTextChanged.disconnect(self.load_instruct)
+        except RuntimeError:
+            pass
+        self.ui.comboBox_select_config.clear()
+        self.ui.comboBox_select_config.currentTextChanged.connect(self.load_instruct)
+        self.ui.comboBox_select_config.addItems(configs)
+
+
+    def add_config(self):
+        """新建配置文件"""
+        configs = os.listdir('config')
+
+        new_config, _ = QInputDialog.getText(self, "新建配置文件", "名称:", text="默认")
+
+        if new_config:
+            checked_config = check_filename_feasible(new_config,replace=True)
+            if checked_config in configs:  # 如果有重复，则添加随机后缀
+                random_string = ''.join(random.choices(string.ascii_lowercase, k=6))
+                checked_config = f"{checked_config}_{random_string}"
+
+            os.makedirs(f'config/{checked_config}')
+
+            self.ui.comboBox_select_config.addItem(checked_config)
+            self.ui.comboBox_select_config.setCurrentText(checked_config)
+
+    def delete_config(self):
+        """删除配置文件"""
+        del_config = self.ui.comboBox_select_config.currentText()
+
+        send2trash.send2trash(f'config/{del_config}')
+        self.load_config_to_comboBox()
+
+
     def check_default_config(self):
         """检查初始配置文件"""
         if not os.path.exists('config') or not os.listdir('config'):
@@ -165,9 +224,10 @@ loop_time = 1"""
                 sw.write(setting)
 
     def save_config(self):
-        """保存配置寄文件"""
+        """保存配置文件"""
         config = configparser.ConfigParser()
-        config.read("config.ini", encoding='utf-8')  # 配置文件的路径
+        path = f'config/{self.ui.comboBox_select_config.currentText()}/setting.ini'
+        config.read(path, encoding='utf-8')  # 配置文件的路径
         config.clear()  # 清除全部内容
 
         total_command_number = self.ui.listWidget_instruct_area.count()
@@ -185,7 +245,7 @@ loop_time = 1"""
             for key in instruct_data:
                 config.set(str(i), str(key), str(instruct_data[key]))
 
-        config.write(open('config.ini', 'w', encoding='utf-8'))
+        config.write(open(path, 'w', encoding='utf-8'))
 
 
 

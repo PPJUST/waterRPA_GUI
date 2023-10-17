@@ -4,15 +4,7 @@ from typing import Tuple, Union
 
 import pyautogui
 import random
-default_duration: float = 0.25  # 默认移动所需时间
-max_duration: float = 9999.99  # 移动所需时间的最大值限制
-default_presses: int = 1  # 默认重复次数
-default_clicks: int = 1  # 默认点击次数
-max_clicks: int = 9  # 点击次数的最大值限制
-default_interval: float = 0.1  # 默认每次点击间隔时间
-max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
-max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
-default_wait_time = 1  # 默认等待时间
+from constant_setting import *
 
 
 class instruct_mouse:
@@ -48,34 +40,31 @@ class instruct_mouse:
         pyautogui.dragTo(x, y, button=button, duration=duration)
 
     @staticmethod
-    def mouse_click(x: int, y: int, button: str = 'left', clicks: int = default_clicks,
-                    interval: float = default_interval, duration: float = default_duration):
-        """在指定位置点击鼠标
+    def mouse_click(button: str = 'left', clicks: int = default_clicks,
+                    interval: float = default_interval):
+        """点击鼠标
         button 为点击的按键，可设置为"left", "middle", right
         clicks 为点击次数
-        interval 为点击间隔时间
-        duration 为移动所需时间，0为瞬间移动"""
-        pyautogui.click(x, y, button=button, clicks=clicks, interval=interval, duration=duration)
+        interval 为点击间隔时间"""
+        pyautogui.click(button=button, clicks=clicks, interval=interval)
 
     @staticmethod
-    def mouse_down(x: int, y: int, button: str = 'left', duration: float = default_duration):
-        """在指定位置按下鼠标
-        button 为点击的按键，可设置为"left", "middle", right
-        duration 为移动所需时间，0为瞬间移动"""
-        pyautogui.mouseDown(x, y, button=button, duration=duration)
+    def mouse_down(button: str = 'left'):
+        """按下鼠标
+        button 为点击的按键，可设置为"left", "middle", right"""
+        pyautogui.mouseDown(button=button)
 
     @staticmethod
-    def mouse_up(x: int, y: int, button: str = 'left', duration: float = default_duration):
-        """在指定位置释放鼠标
-        button 为点击的按键，可设置为"left", "middle", right
-        duration 为移动所需时间，0为瞬间移动"""
-        pyautogui.mouseUp(x, y, button=button, duration=duration)
+    def mouse_up(button: str = 'left'):
+        """释放鼠标
+        button 为点击的按键，可设置为"left", "middle", right"""
+        pyautogui.mouseUp(button=button)
 
     @staticmethod
-    def mouse_scroll(x: int, y: int, distance: int):
-        """在指定位置滚动滚轮
-        clicks 为滚动格数，正数向上滚动，负数向下滚动"""
-        pyautogui.scroll(clicks=distance, x=x, y=y)
+    def mouse_scroll(distance: int):
+        """滚动滚轮
+        distance 为滚动格数，正数向上滚动，负数向下滚动"""
+        pyautogui.scroll(clicks=distance)
 
 
 class instruct_keyboard:
@@ -141,7 +130,7 @@ class instruct_pic:
         pyautogui.screenshot(pic_file, region=region)
 
     @staticmethod
-    def _search_pic_first_position(pic_file: str, confidence: float = 0.9) -> Tuple[Union[int, None], Union[int, None]]:
+    def _search_pic_first_position(pic_file: str, confidence: float = default_confidence) -> Tuple[Union[int, None], Union[int, None]]:
         """获得在屏幕上第一个找到的文件图片的中心点坐标，如果没有找到则返回None
         confidence 为查找精度"""
         position = pyautogui.locateCenterOnScreen(pic_file, confidence=confidence)
@@ -153,7 +142,7 @@ class instruct_pic:
         return x, y
 
     @staticmethod
-    def _search_pic_all_position(pic_file: str, confidence: float = 0.9) -> list:
+    def _search_pic_all_position(pic_file: str, confidence: float = default_confidence) -> list:
         """获得在屏幕上所有找到的文件图片的中心点坐标，如果没有找到则返回None
         返回的坐标格式为[(x, y), (x_1, y_2)]
         confidence 为查找精度"""
