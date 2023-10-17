@@ -11,7 +11,7 @@ from PySide2.QtGui import *
 from PySide2.QtWidgets import *
 
 import qdialog_screenshot
-from constant_setting import *
+from constant_setting import default_args_dict, pyautogui_keyboard_keys, code_command_dict,icon_edit,icon_error,icon_right,error_stylesheet_border
 
 def print_function_info(model: str = 'current'):
     """打印当前/上一个执行的函数信息
@@ -240,23 +240,28 @@ class command_widget_move_mouse_to_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_duration = default_args_dict['max_duration']
+        default_duration = default_args_dict['default_duration']
+        max_x = default_args_dict['max_x']
+        default_x = default_args_dict['default_x']
+        max_y = default_args_dict['max_y']
+        default_y = default_args_dict['default_y']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
-                try:
-                    exec(exec_type1)
+                exec_command_most = f"""{key}={value}"""
+                exec_command_str = f"""{key}='{value}'"""
+                try:# 备忘录 测试中
+                    exec(f'default_args_dict[{key}]=[{value}]')
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(exec_command_str)
                 except:
                     pass
+                print(f'修改参数 {exec_command_most}')
+        print(default_x)
 
         """
         ui设置
@@ -346,21 +351,23 @@ class command_widget_drag_mouse_to_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_duration = default_args_dict['max_duration']
+        default_duration = default_args_dict['default_duration']
+        max_x = default_args_dict['max_x']
+        default_x = default_args_dict['default_x']
+        max_y = default_args_dict['max_y']
+        default_y = default_args_dict['default_y']
+        default_button = default_args_dict['default_button']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -464,21 +471,21 @@ class command_widget_mouse_click(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_button = default_args_dict['default_button']
+        default_clicks = default_args_dict['default_clicks']
+        max_clicks = default_args_dict['max_clicks']
+        max_interval = default_args_dict['max_interval']
+        default_interval = default_args_dict['default_interval']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -556,21 +563,17 @@ class command_widget_mouse_down(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_button = default_args_dict['default_button']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -625,21 +628,17 @@ class command_widget_mouse_up(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_button = default_args_dict['default_button']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -690,21 +689,18 @@ class command_widget_mouse_scroll(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_direction = default_args_dict['default_direction']
+        default_distance = default_args_dict['default_distance']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -770,21 +766,19 @@ class command_widget_press_text(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_interval = default_args_dict['max_interval']
+        default_interval = default_args_dict['default_interval']
+        default_message = default_args_dict['default_message']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -848,21 +842,19 @@ class command_widget_press_keys(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_interval = default_args_dict['max_interval']
+        default_interval = default_args_dict['default_interval']
+        default_keys = default_args_dict['default_keys']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -955,21 +947,17 @@ class command_widget_press_hotkey(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_hotkeys = default_args_dict['default_hotkeys']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1037,21 +1025,17 @@ class command_widget_press_down_key(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_key = default_args_dict['default_key']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1116,21 +1100,17 @@ class command_widget_press_up_key(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_key = default_args_dict['default_key']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1195,21 +1175,17 @@ class command_widget_screenshot_fullscreen(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_pic_file = default_args_dict['default_pic_file']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1276,21 +1252,20 @@ class command_widget_screenshot_area(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_x = default_args_dict['max_x']
+        max_y = default_args_dict['max_y']
+        default_area = default_args_dict['default_area']
+        default_pic_file = default_args_dict['default_pic_file']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1449,21 +1424,20 @@ class command_widget_move_to_pic_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_duration = default_args_dict['max_duration']
+        default_duration = default_args_dict['default_duration']
+        default_pic_file = default_args_dict['default_pic_file']
+        default_find_model= default_args_dict['default_find_model']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1614,21 +1588,25 @@ class command_widget_click_pic_position(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        max_duration = default_args_dict['max_duration']
+        default_duration = default_args_dict['default_duration']
+        default_button = default_args_dict['default_button']
+        default_clicks = default_args_dict['default_clicks']
+        max_clicks = default_args_dict['max_clicks']
+        max_interval = default_args_dict['max_interval']
+        default_interval = default_args_dict['default_interval']
+        default_pic_file = default_args_dict['default_pic_file']
+        default_find_model = default_args_dict['default_find_model']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1838,21 +1816,17 @@ class command_widget_wait(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_wait_time = default_args_dict['default_wait_time']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
@@ -1903,21 +1877,18 @@ class command_widget_wait_random(QWidget):
     def __init__(self, args_dict_config=None):
         super().__init__()
         """
-        将字典项转换为变量，用于更新参数
+        获取初始参数值
         """
+        default_wait_time_min = default_args_dict['default_wait_time_min']
+        default_wait_time_max = default_args_dict['default_wait_time_max']
+
         if args_dict_config:
             for key in args_dict_config:
                 value = args_dict_config[key]
-                exec_type1 = f"""
-                global {key}
-                {key}={value}"""
-                exec_type2 = f"""
-                global {key}
-                {key}='{value}'"""
                 try:
-                    exec(exec_type1)
+                    exec(f"{key}={value}")
                 except NameError:  # 如果原本就是str，则使用exec后会报错
-                    exec(exec_type2)
+                    exec(f"{key}='{value}'")
                 except:
                     pass
 
