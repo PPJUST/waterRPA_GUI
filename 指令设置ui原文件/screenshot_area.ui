@@ -114,6 +114,23 @@
      <item>
       <widget class="QLineEdit" name="lineEdit_pic_file"/>
      </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="frameShadow">
+        <enum>QFrame::Plain</enum>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton_locate">
+       <property name="text">
+        <string>定位</string>
+       </property>
+      </widget>
+     </item>
     </layout>
     <zorder>label_4</zorder>
     <zorder>label_3</zorder>
@@ -125,6 +142,8 @@
     <zorder>spinBox_lx_2</zorder>
     <zorder>label_7</zorder>
     <zorder>lineEdit_pic_file</zorder>
+    <zorder>line</zorder>
+    <zorder>toolButton_locate</zorder>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -1,4 +1,5 @@
 import configparser
+import shutil
 import string
 
 import send2trash
@@ -7,6 +8,7 @@ from PySide2.QtWidgets import QMainWindow, QListWidgetItem, QListWidget, QInputD
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
+
 
 
 class Main(QMainWindow):
@@ -22,6 +24,7 @@ class Main(QMainWindow):
         self.check_default_config()
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
+        self.ui.listWidget_instruct_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 禁止水平滚动条
 
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
         self.load_config_to_combobox()  # 加载配置文件到comboBox
@@ -85,14 +88,19 @@ class Main(QMainWindow):
 
         # 在当前索引后插入新的控件组
         widget_instruct = WidgetInstructLine(args_dict_config)
-        id_random = create_random_string(16)
+        id_random = create_random_string(8)
         widget_instruct.setProperty('id', id_random)  # 设置命令行控件组的唯一id
         self.instruct_setting[id_random] = {}  # 创建对应的空键值对
         list_widget_item = QListWidgetItem()
-        list_widget_item.setSizeHint(widget_instruct.sizeHint() * 2)  # 设置列表项的大小
+        resize = QSize(self.ui.listWidget_instruct_area.size().width() , 100)
+        list_widget_item.setSizeHint(resize)  # 设置列表项的大小
         list_widget_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)  # 启用列表项的拖放支持
+
         self.ui.listWidget_instruct_area.insertItem(index + 1, list_widget_item)
         self.ui.listWidget_instruct_area.setItemWidget(list_widget_item, widget_instruct)
+
+        # 设置行项目的边框
+        self.ui.listWidget_instruct_area.setStyleSheet("QListWidget::item { border: 1px solid grey; }")
 
         # 内部控件连接槽函数
         widget_instruct.toolButton_add_instruct.clicked.connect(self.insert_instruct_line_widgets)
@@ -143,18 +151,30 @@ class Main(QMainWindow):
             instruct_function = command_link_dict[command_type]['function']  # 查表获取完整函数str
             instruct_data = self.instruct_setting[instruct_id]  # 根据id获取参数str
 
+            instruct_widget.toolButton_state.setIcon(QIcon(icon_process))  # 修改状态的图标-执行
+
             # 将字典项转换为变量，用于后续调用函数
-            for key in instruct_data:
-                value = instruct_data[key]
+            for key, value in instruct_data.items():
                 convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
                 if value in convert:
                     value = convert[value]
-                exec(f"{key}='{value}'",globals())
+                locals()[key] = value
 
             # 调用对应函数，相关变量已使用exec创建
             print(f'执行函数 {instruct_function}')
-            print(f'函数参数 {instruct_data}')
-            exec(f'{instruct_function}')
+            print(f'参数 {instruct_data}')
+            try:
+                exec(f'{instruct_function}')
+                instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
+            except Exception as e:
+                error_message = str(e)
+                instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
+                print("函数执行出错：", error_message)
+                break  # 如果报错，退出循环
+
+
+
+
 
         self.ui.pushButton_start.setEnabled(True)
         self.ui.pushButton_stop.setEnabled(False)
@@ -168,7 +188,7 @@ class Main(QMainWindow):
 
     def load_config_to_combobox(self):
         """加载配置文件到comboBox中显示"""
-        configs = os.listdir('config')
+        configs = [i for i in os.listdir('config') if os.path.isdir(os.path.join('config', i))]
         try:
             self.ui.comboBox_select_config.currentTextChanged.disconnect(self.load_instruct)
         except RuntimeError:
@@ -204,9 +224,16 @@ class Main(QMainWindow):
     @staticmethod
     def check_default_config():
         """检查初始配置文件"""
-        if not os.path.exists('config') or not os.listdir('config'):
+        config_name = 'global.ini'
+        if not os.path.exists('config'):
             os.makedirs('config/默认')
-            with open('config/默认/setting.ini', 'w', encoding='utf-8') as sw:
+        if not [i for i in os.listdir('config') if os.path.isdir(os.path.join('config', i))]:  # 如果内部无配置文件夹
+            os.makedirs('config/默认')
+        if not os.path.exists('screenshot'):
+            os.makedirs('screenshot')
+
+        if not os.path.exists(f'config/{config_name}'):
+            with open(f'config/{config_name}', 'w', encoding='utf-8') as sw:
                 setting = """[DEFAULT]
 loop_time = 1"""
                 sw.write(setting)
@@ -229,9 +256,19 @@ loop_time = 1"""
 
             config.add_section(str(i))
             config.set(str(i), 'command_type', command_type)
-
-            for key in instruct_data:
-                config.set(str(i), str(key), str(instruct_data[key]))
+            for key, value in instruct_data.items():
+                if key == 'pic_file':  # 单独处理截图路径
+                    parent_folder = os.path.normpath(os.path.split(value)[0])
+                    check_folder = os.path.normpath(os.path.join(os.getcwd(), 'screenshot'))
+                    if parent_folder == check_folder:
+                        current_config = self.ui.comboBox_select_config.currentText()
+                        pic_name = os.path.split(value)[1]
+                        config_path = os.path.join(os.getcwd(),'config',current_config)
+                        new_pic_file = os.path.normpath(os.path.join(config_path,pic_name))
+                        print(new_pic_file)
+                        shutil.move(value, new_pic_file)
+                        value = new_pic_file
+                config.set(str(i), str(key), str(value))
 
         config.write(open(path, 'w', encoding='utf-8'))
 
