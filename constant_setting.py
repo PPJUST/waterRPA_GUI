@@ -17,31 +17,56 @@ error_stylesheet_border = 'border: 1px solid red;'
 """
 默认参数值设置
 """
-default_duration: float = 0.25  # 默认移动所需时间
-max_duration: float = 9999.99  # 移动所需时间的最大值限制
-default_presses: int = 1  # 默认重复次数
-default_clicks: int = 1  # 默认点击次数
-max_clicks: int = 9  # 点击次数的最大值限制
-default_interval: float = 0.1  # 默认每次点击间隔时间
-max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
-max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
-default_wait_time = 1  # 默认等待时间
-default_wait_time_min = 1  # 默认等待时间（区间最小值）
-default_wait_time_max = 1  # 默认等待时间（区间最大值）
-default_button = '左键'  # 默认鼠标按键
-default_direction = '向上'  # 默认滚动方向
-default_distance = 0  # 默认滚动距离
-default_find_model = '第一个'  # 默认寻图模式
-default_pic_file = ''  # 默认图片路径
-default_message = ''  # 默认文本
-default_hotkeys = ''  # 默认热键
-default_keys = ''  # 默认键
-default_key = ''  # 默认键
-default_x = 0  # 默认x轴坐标值
-default_y = 0  # 默认y轴坐标值
-default_confidence = 0.9  # 默认寻图精度
-default_area = (0, 0, 0, 0)  # 默认区域截图范围
-
+# default_duration: float = 0.25  # 默认移动所需时间
+# max_duration: float = 9999.99  # 移动所需时间的最大值限制
+# default_presses: int = 1  # 默认重复次数
+# default_clicks: int = 1  # 默认点击次数
+# max_clicks: int = 9  # 点击次数的最大值限制
+# default_interval: float = 0.1  # 默认每次点击间隔时间
+# max_interval: float = 9999.99  # 每次点击间隔时间的最大值限制
+# max_x, max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
+# default_wait_time = 1  # 默认等待时间
+# default_wait_time_min = 1  # 默认等待时间（区间最小值）
+# default_wait_time_max = 1  # 默认等待时间（区间最大值）
+# default_button = '左键'  # 默认鼠标按键
+# default_direction = '向上'  # 默认滚动方向
+# default_distance = 0  # 默认滚动距离
+# default_find_model = '第一个'  # 默认寻图模式
+# default_pic_file = ''  # 默认图片路径
+# default_message = ''  # 默认文本
+# default_hotkeys = ''  # 默认热键
+# default_keys = ''  # 默认键
+# default_key = ''  # 默认键
+# default_x = 0  # 默认x轴坐标值
+# default_y = 0  # 默认y轴坐标值
+# default_confidence = 0.9  # 默认寻图精度
+# default_area = (0, 0, 0, 0)  # 默认区域截图范围
+# 上述参数转字典
+default_args_dict = {'default_duration': 0.25,
+                     'max_duration': 9999.99,
+                     'default_presses': 1,
+                     'default_clicks': 1,
+                     'max_clicks': 9,
+                     'default_interval': 0.1,
+                     'max_interval': 9999.99,
+                     'max_x': pyautogui.size()[0],
+                     'max_y': pyautogui.size()[1],
+                     'default_wait_time': 1,
+                     'default_wait_time_min': 1,
+                     'default_wait_time_max': 1,
+                     'default_button': '左键',
+                     'default_direction': '向上',
+                     'default_distance': 0,
+                     'default_find_model': '第一个',
+                     'default_pic_file': '',
+                     'default_message': '',
+                     'default_hotkeys': '',
+                     'default_keys': '',
+                     'default_key': '',
+                     'default_x': 0,
+                     'default_y': 0,
+                     'default_confidence': 0.9,
+                     'default_area': (0, 0, 0, 0)}
 """
 指令对应字典
 """
@@ -56,7 +81,7 @@ command_link_dict = {'': {'function': '', 'widget': ''},
                     '鼠标操作-滚动滚轮':{'function':'InstructMouse.mouse_scroll(distance=distance)','widget':'command_widget_mouse_scroll'},
                     '键盘操作-输入文本':{'function':'InstructKeyboard.press_text(message=message,interval=interval)','widget':'command_widget_press_text'},
                     '键盘操作-敲击':{'function':'InstructKeyboard.press_keys(keys=keys,presses=presses,interval=interval)','widget':'command_widget_press_keys'},
-                    '键盘操作-使用热键':{'function':'InstructKeyboard.press_hotkey(hotkeys=hotkeys)','widget':'command_widget_press_hotkey'},
+                    '键盘操作-使用热键':{'function':'InstructKeyboard.press_hotkey(hotkeys)','widget':'command_widget_press_hotkey'},
                     '键盘操作-按下(不释放)':{'function':'InstructKeyboard.press_down_key(key=key)','widget':'command_widget_press_down_key'},
                     '键盘操作-释放':{'function':'InstructKeyboard.press_up_key(key=key)','widget':'command_widget_press_up_key'},
                     '图像操作-全屏截图':{'function':'InstructPic.screenshot_fullscreen(pic_file=pic_file)','widget':'command_widget_screenshot_fullscreen'},

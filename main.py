@@ -3,11 +3,12 @@ import shutil
 import string
 
 import send2trash
-from PySide2.QtWidgets import QMainWindow, QListWidgetItem, QListWidget, QInputDialog
+from PySide2.QtWidgets import QMainWindow, QListWidgetItem, QListWidget, QInputDialog, QMessageBox
 
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
+from constant_setting import *
 
 
 
@@ -138,6 +139,8 @@ class Main(QMainWindow):
 
     def start_instruct(self):
         """执行指令"""
+        self.save_config()  # 执行前先保存一次
+
         self.ui.pushButton_start.setEnabled(False)
         self.ui.pushButton_stop.setEnabled(True)
 
@@ -156,21 +159,22 @@ class Main(QMainWindow):
             # 将字典项转换为变量，用于后续调用函数
             for key, value in instruct_data.items():
                 convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
-                if value in convert:
+                if type(value)is str and value in convert:
                     value = convert[value]
                 locals()[key] = value
 
             # 调用对应函数，相关变量已使用exec创建
             print(f'执行函数 {instruct_function}')
             print(f'参数 {instruct_data}')
-            try:
-                exec(f'{instruct_function}')
-                instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
-            except Exception as e:
-                error_message = str(e)
-                instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
-                print("函数执行出错：", error_message)
-                break  # 如果报错，退出循环
+            exec(f'{instruct_function}')  # 备忘录 测试用
+            # try:
+            #     exec(f'{instruct_function}')
+            #     instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
+            # except Exception as e:
+            #     error_message = str(e)
+            #     instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
+            #     print("函数执行出错：", error_message)
+            #     break  # 如果报错，退出循环
 
 
 
@@ -197,11 +201,15 @@ class Main(QMainWindow):
         self.ui.comboBox_select_config.currentTextChanged.connect(self.load_instruct)
         self.ui.comboBox_select_config.addItems(configs)
 
-    def add_config(self):
+        # 如果为空则自动新建一个
+        if self.ui.comboBox_select_config.count() == 0:
+            self.add_config(new_config='默认')
+
+    def add_config(self, new_config:str =None):
         """新建配置文件"""
         configs = os.listdir('config')
-
-        new_config, _ = QInputDialog.getText(self, "新建配置文件", "名称:", text="默认")
+        if not new_config:
+            new_config, _ = QInputDialog.getText(self, "新建配置文件", "名称:", text="默认")
 
         if new_config:
             checked_config = check_filename_feasible(new_config, replace=True)
@@ -218,8 +226,17 @@ class Main(QMainWindow):
         """删除配置文件"""
         del_config = self.ui.comboBox_select_config.currentText()
 
-        send2trash.send2trash(f'config/{del_config}')
-        self.load_config_to_combobox()
+        # 弹出确认对话框
+
+        reply = QMessageBox.warning(self,"删除配置文件",f"是否删除【{del_config}】",QMessageBox.Yes,QMessageBox.No)
+
+        if reply == QMessageBox.Yes:
+            send2trash.send2trash(f'config/{del_config}')
+            self.load_config_to_combobox()
+
+
+
+
 
     @staticmethod
     def check_default_config():
@@ -266,7 +283,7 @@ loop_time = 1"""
                         config_path = os.path.join(os.getcwd(),'config',current_config)
                         new_pic_file = os.path.normpath(os.path.join(config_path,pic_name))
                         print(new_pic_file)
-                        shutil.move(value, new_pic_file)
+                        shutil.copyfile(value, new_pic_file)
                         value = new_pic_file
                 config.set(str(i), str(key), str(value))
 

@@ -1,9 +1,11 @@
 """pyautogui的封装"""
 import random
+import string
 import time
 from typing import Tuple, Union
 
 import pyautogui
+import pyperclip
 
 """参数默认设置"""
 _default_duration: float = 0.25  # 默认移动所需时间
@@ -86,7 +88,16 @@ class InstructKeyboard:
     def press_text(message: str, interval: float = _default_interval):
         """输入字符串
         interval为 每次输入的间隔时间"""
-        pyautogui.typewrite(message=message, interval=interval)
+        # 只支持键盘上的按键，不支持中文、日文等打字语言
+        # string.printable为键盘上支持输入的字符列表
+
+        for word in message:
+            if word in string.printable:
+                pyautogui.typewrite(message=word)
+            else:
+                pyperclip.copy(word)
+                pyautogui.hotkey('ctrl', 'v')
+            time.sleep(interval)
 
     @staticmethod
     def press_keys(*keys: str, presses: int = _default_presses, interval: float = _default_interval):
@@ -107,9 +118,9 @@ class InstructKeyboard:
         pyautogui.keyUp(key)
 
     @staticmethod
-    def press_hotkey(*hotkeys: Union[str, list]):
+    def press_hotkey(hotkeys: list):
         """按下组合键，实现热键操作
-        hotkeys 可传入list"""
+        hotkeys 传入list"""
         pyautogui.hotkey(hotkeys)
 
 
@@ -169,7 +180,7 @@ class InstructPic:
         pic_file 为图片文件路径
         duration 为移动所需时间，0为瞬间移动
         find_model 为查找模式，'第一个'或'全部'，用于点击"""
-        all_center_position = InstructPic._search_pic_first_position(pic_file)
+        all_center_position = InstructPic._search_pic_all_position(pic_file)
         if all_center_position:
             if find_model == '第一个':
                 x, y = all_center_position[0]
@@ -193,7 +204,7 @@ class InstructPic:
         interval 为点击间隔时间
         duration 为移动所需时间，0为瞬间移动
         find_model 为查找模式，'第一个匹配项'或'全部匹配项'，用于点击"""
-        all_center_position = InstructPic._search_pic_first_position(pic_file)
+        all_center_position = InstructPic._search_pic_all_position(pic_file)
         if all_center_position:
             if find_model == '第一个':
                 x, y = all_center_position[0]
