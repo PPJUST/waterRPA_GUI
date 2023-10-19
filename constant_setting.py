@@ -72,22 +72,25 @@ default_args_dict = {'default_duration': 0.25,
 """
 # 对应字典设计 combox项:{function:对应函数, widget:对应控件}
 # 第一个元素留空，用于初始显示
-command_link_dict = {'': {'function': '', 'widget': ''},
+command_link_dict = {'---鼠标---': {'function': '', 'widget': ''},
                     '鼠标操作-移动':{'function':'InstructMouse.move_mouse_to_position(x=x,y=y,duration=duration)','widget':'command_widget_move_mouse_to_position'},
                     '鼠标操作-按下并拖拽':{'function':'InstructMouse.drag_mouse_to_position(x=x,y=y,button=button,duration=duration)','widget':'command_widget_drag_mouse_to_position'},
                     '鼠标操作-点击':{'function':'InstructMouse.mouse_click(button=button,clicks=clicks,interval=interval)','widget':'command_widget_mouse_click'},
                     '鼠标操作-按下(不释放)':{'function':'InstructMouse.mouse_down(button=button)','widget':'command_widget_mouse_down'},
                     '鼠标操作-释放':{'function':'InstructMouse.mouse_up(button=button)','widget':'command_widget_mouse_up'},
                     '鼠标操作-滚动滚轮':{'function':'InstructMouse.mouse_scroll(distance=distance)','widget':'command_widget_mouse_scroll'},
+                    '---键盘---': {'function': '', 'widget': ''},
                     '键盘操作-输入文本':{'function':'InstructKeyboard.press_text(message=message,interval=interval)','widget':'command_widget_press_text'},
                     '键盘操作-敲击':{'function':'InstructKeyboard.press_keys(keys=keys,presses=presses,interval=interval)','widget':'command_widget_press_keys'},
                     '键盘操作-使用热键':{'function':'InstructKeyboard.press_hotkey(hotkeys)','widget':'command_widget_press_hotkey'},
                     '键盘操作-按下(不释放)':{'function':'InstructKeyboard.press_down_key(key=key)','widget':'command_widget_press_down_key'},
                     '键盘操作-释放':{'function':'InstructKeyboard.press_up_key(key=key)','widget':'command_widget_press_up_key'},
+                    '---寻图---': {'function': '', 'widget': ''},
                     '图像操作-全屏截图':{'function':'InstructPic.screenshot_fullscreen(pic_file=pic_file)','widget':'command_widget_screenshot_fullscreen'},
                     '图像操作-区域截图':{'function':'InstructPic.screenshot_area(pic_file=pic_file,area=area)','widget':'command_widget_screenshot_area'},
                     '图像操作-匹配图片并移动':{'function':'InstructPic.move_to_pic_position(pic_file=pic_file,duration=duration,find_model=find_model)','widget':'command_widget_move_to_pic_position'},
                     '图像操作-匹配图片并点击':{'function':'InstructPic.click_pic_position(clicks=clicks,button=button,pic_file=pic_file,interval=interval,duration=duration,find_model=find_model)','widget':'command_widget_click_pic_position'},
+                    '---其他---': {'function': '', 'widget': ''},
                     '其他-等待时间':{'function':'InstructCustom.wait(wait_time=wait_time)','widget':'command_widget_wait'},
                     '其他-等待时间（区间随机）':{'function':'InstructCustom.wait(wait_time=wait_time)','widget':'command_widget_wait_random'}}
 

@@ -40,7 +40,6 @@ class Main(QMainWindow):
         self.ui.toolButton_save_config.clicked.connect(self.save_config)
         self.ui.toolButton_add_config.clicked.connect(self.add_config)
         self.ui.toolButton_delete_config.clicked.connect(self.delete_config)
-        self.ui.comboBox_select_config.currentTextChanged.connect(self.load_instruct)
         # 功能区
         self.ui.pushButton_start.clicked.connect(self.start_instruct)
         self.ui.pushButton_stop.clicked.connect(self.stop_instruct)
@@ -147,12 +146,22 @@ class Main(QMainWindow):
 
         self.ui.listWidget_instruct_area.takeItem(index)
 
+    def reset_state_icon(self):
+        """重置状态图标"""
+        total_command_number = self.ui.listWidget_instruct_area.count()
+
+        for i in range(total_command_number):
+            item = self.ui.listWidget_instruct_area.item(i)
+            instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
+            instruct_widget.toolButton_state.setIcon(QIcon(icon_process))  # 修改状态的图标-执行
+
     def start_instruct(self):
         """执行指令"""
         self.save_config()  # 执行前先保存一次
 
         self.ui.pushButton_start.setEnabled(False)
         self.ui.pushButton_stop.setEnabled(True)
+        self.reset_state_icon()  # 重置状态图标
 
         total_command_number = self.ui.listWidget_instruct_area.count()
 
@@ -164,8 +173,6 @@ class Main(QMainWindow):
             instruct_function = command_link_dict[command_type]['function']  # 查表获取完整函数str
             instruct_data = self.instruct_setting[instruct_id]  # 根据id获取参数str
 
-            instruct_widget.toolButton_state.setIcon(QIcon(icon_process))  # 修改状态的图标-执行
-
             # 将字典项转换为变量，用于后续调用函数
             for key_arg, value in instruct_data.items():
                 convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
@@ -176,33 +183,45 @@ class Main(QMainWindow):
             # 调用对应函数，相关变量已使用exec创建
             print(f'执行函数 {instruct_function}')
             print(f'参数 {instruct_data}')
-            print(command_type)
             if command_type in ['图像操作-匹配图片并移动', '图像操作-匹配图片并点击']:
-
                 time_start = time.time()
                 retry_time = 60  # 寻图重试时间上限（默认60秒）
+                is_find_pic = False  # 是否找到了图片
                 while True:
-                    print('循环')
                     time_process = time.time()-time_start
                     if time_process > retry_time:
                         break
-                    result = eval(f'{instruct_function}')  # 备忘录 测试用
+
+                    try:
+                        result = eval(f'{instruct_function}')
+                    except Exception as e:
+                        error_message = str(e)
+                        print("函数执行出错：", error_message)
+                        QMessageBox.warning(self, "错误", f"错误信息：【{error_message}】")
+                        break  # 如果报错，退出循环
+
                     if result:  # 返回True则结束
+                        is_find_pic = True
                         break
                     else:  # 返回False则重试直至上限
                         time.sleep(0.1)
 
-            else:
-                exec(f'{instruct_function}')  # 备忘录 测试用
+                if is_find_pic:
+                    instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
+                else:  # 未找到图片则提醒并退出总循环
+                    instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
+                    break
 
-            # try:
-            #     exec(f'{instruct_function}')
-            #     instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
-            # except Exception as e:
-            #     error_message = str(e)
-            #     instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
-            #     print("函数执行出错：", error_message)
-            #     break  # 如果报错，退出循环
+            else:
+                try:
+                    exec(f'{instruct_function}')
+                    instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
+                except Exception as e:
+                    instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
+                    error_message = str(e)
+                    print("函数执行出错：", error_message)
+                    QMessageBox.warning(self,"错误",f"错误信息：【{error_message}】")
+                    break  # 如果报错，退出循环
 
 
         self.ui.pushButton_start.setEnabled(True)
