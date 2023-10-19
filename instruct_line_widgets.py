@@ -244,8 +244,7 @@ class command_widget_move_mouse_to_position(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_duration = default_args_dict_copy['max_duration']
         default_duration = default_args_dict_copy['default_duration']
@@ -347,16 +346,15 @@ class command_widget_drag_mouse_to_position(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
-        max_duration = args_dict_config['max_duration']
-        default_duration = args_dict_config['default_duration']
-        max_x = args_dict_config['max_x']
-        default_x = args_dict_config['default_x']
-        max_y = args_dict_config['max_y']
-        default_y = args_dict_config['default_y']
-        default_button = args_dict_config['default_button']
+        max_duration = default_args_dict_copy['max_duration']
+        default_duration = default_args_dict_copy['default_duration']
+        max_x = default_args_dict_copy['max_x']
+        default_x = default_args_dict_copy['default_x']
+        max_y = default_args_dict_copy['max_y']
+        default_y = default_args_dict_copy['default_y']
+        default_button = default_args_dict_copy['default_button']
 
         """
         ui设置
@@ -462,8 +460,7 @@ class command_widget_mouse_click(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_button = default_args_dict_copy['default_button']
         default_clicks = default_args_dict_copy['default_clicks']
@@ -548,8 +545,7 @@ class command_widget_mouse_down(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_button = default_args_dict_copy['default_button']
         """
@@ -607,8 +603,7 @@ class command_widget_mouse_up(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_button = default_args_dict_copy['default_button']
         """
@@ -662,8 +657,7 @@ class command_widget_mouse_scroll(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_direction = default_args_dict_copy['default_direction']
         default_distance = default_args_dict_copy['default_distance']
@@ -734,8 +728,7 @@ class command_widget_press_text(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_interval = default_args_dict_copy['max_interval']
         default_interval = default_args_dict_copy['default_interval']
@@ -750,7 +743,7 @@ class command_widget_press_text(QWidget):
         self.horizontalLayout.addWidget(self.label_2)
 
         self.lineEdit_message = QLineEdit()
-        self.lineEdit_message.setPlaceholderText('输入文本')
+        self.lineEdit_message.setPlaceholderText('输入文本(执行的方式为键入与粘贴混合)')
         if default_message:
             self.lineEdit_message.setText(default_message)
         self.horizontalLayout.addWidget(self.lineEdit_message)
@@ -804,12 +797,12 @@ class command_widget_press_keys(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_interval = default_args_dict_copy['max_interval']
         default_interval = default_args_dict_copy['default_interval']
         default_keys = default_args_dict_copy['default_keys']
+        default_presses = default_args_dict_copy['default_presses']
         """
         ui设置
         """
@@ -826,15 +819,16 @@ class command_widget_press_keys(QWidget):
         self.horizontalLayout.addWidget(self.lineEdit_keys)
 
         self.label_3 = QLabel()
-        self.label_3.setText('中的键，重复')
+        self.label_3.setText('中的键，执行')
         self.horizontalLayout.addWidget(self.label_3)
 
         self.spinBox_presses = QSpinBox()
         self.spinBox_presses.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_presses.setValue(default_presses)
         self.horizontalLayout.addWidget(self.spinBox_presses)
 
         self.label_4 = QLabel()
-        self.label_4.setText('次，每次重复间隔')
+        self.label_4.setText('次，每次执行间隔')
         self.horizontalLayout.addWidget(self.label_4)
 
         self.doubleSpinBox_interval = QDoubleSpinBox()
@@ -903,8 +897,7 @@ class command_widget_press_hotkey(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_hotkeys = default_args_dict_copy['default_hotkeys']
         """
@@ -975,8 +968,7 @@ class command_widget_press_down_key(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_key = default_args_dict_copy['default_key']
         """
@@ -1044,8 +1036,7 @@ class command_widget_press_up_key(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_key = default_args_dict_copy['default_key']
         """
@@ -1113,8 +1104,7 @@ class command_widget_screenshot_fullscreen(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_pic_file = default_args_dict_copy['default_pic_file']
         """
@@ -1184,8 +1174,7 @@ class command_widget_screenshot_area(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_x = default_args_dict_copy['max_x']
         max_y = default_args_dict_copy['max_y']
@@ -1376,8 +1365,7 @@ class command_widget_move_to_pic_position(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_duration = default_args_dict_copy['max_duration']
         default_duration = default_args_dict_copy['default_duration']
@@ -1535,8 +1523,7 @@ class command_widget_click_pic_position(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         max_duration = default_args_dict_copy['max_duration']
         default_duration = default_args_dict_copy['default_duration']
@@ -1757,8 +1744,7 @@ class command_widget_wait(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_wait_time = default_args_dict_copy['default_wait_time']
         """
@@ -1812,8 +1798,7 @@ class command_widget_wait_random(QWidget):
         """
         default_args_dict_copy = default_args_dict.copy()
         if args_dict_config:
-            for key in args_dict_config:
-                value = args_dict_config[key]
+            for key ,value in args_dict_config.items():
                 default_args_dict_copy[key] = value
         default_wait_time_min = default_args_dict_copy['default_wait_time_min']
         default_wait_time_max = default_args_dict_copy['default_wait_time_max']

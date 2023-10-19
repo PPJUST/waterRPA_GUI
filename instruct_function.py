@@ -100,9 +100,9 @@ class InstructKeyboard:
             time.sleep(interval)
 
     @staticmethod
-    def press_keys(*keys: str, presses: int = _default_presses, interval: float = _default_interval):
+    def press_keys(keys: list, presses: int = _default_presses, interval: float = _default_interval):
         """敲击指定键
-        keys 传入多个str，不可传入list
+        keys 可传入list
         presses 为重复次数
         interval 为每次重复的间隔时间"""
         pyautogui.press(keys=keys, presses=presses, interval=interval)
@@ -189,6 +189,7 @@ class InstructPic:
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
                     InstructMouse.move_mouse_to_position(x, y, duration=duration)
+            return True
         else:  # 重试识别不在本函数内执行，在外部调用时设置
             print('无匹配项')
             return False
@@ -215,6 +216,7 @@ class InstructPic:
                     x, y = all_center_position[i]
                     InstructMouse.move_mouse_to_position(x=x, y=y, duration=duration)
                     InstructMouse.mouse_click(button=button, clicks=clicks, interval=interval)
+            return True
         else:  # 重试识别不在本函数内执行，在外部调用时设置
             print("无匹配项")
             return False

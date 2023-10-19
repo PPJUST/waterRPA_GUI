@@ -1,6 +1,7 @@
 import configparser
 import shutil
 import string
+import time
 
 import send2trash
 from PySide2.QtWidgets import QMainWindow, QListWidgetItem, QListWidget, QInputDialog, QMessageBox
@@ -48,8 +49,10 @@ class Main(QMainWindow):
         """接收传递的信号"""
         instruct_id = self.sender().property('id')
         self.instruct_setting[instruct_id] = args_dict
+        self.check_instruct_setting()
 
-        # 是否启用执行按钮
+    def check_instruct_setting(self):
+        """检查存储的指令参数设置，判断是否启用执行按钮"""
         self.ui.pushButton_start.setEnabled(True)
         for i_dict in self.instruct_setting.values():
             if i_dict:  # 不考虑空的键值对
@@ -59,6 +62,7 @@ class Main(QMainWindow):
 
     def load_instruct(self):
         """加载命令行设置"""
+        self.instruct_setting = dict()
         self.ui.listWidget_instruct_area.clear()
         current_config = self.ui.comboBox_select_config.currentText()
         config = configparser.ConfigParser()
@@ -134,7 +138,13 @@ class Main(QMainWindow):
         if self.ui.listWidget_instruct_area.count() == 1:  # 如果删除的是最后一个控件组，则先新增一个空白的再删除
             self.insert_instruct_line_widgets()
 
-        index = self.get_index_of_current_widgets(self.sender())
+        index = self.get_index_of_current_widgets(self.sender())  # 获取索引
+        list_item = self.ui.listWidget_instruct_area.item(index)  # 获取行项目对象
+        ins_widget = self.ui.listWidget_instruct_area.itemWidget(list_item)  # 获取控件对象
+        id_widget = ins_widget.property('id')
+        self.instruct_setting.pop(id_widget)  # 从设置dict中删除对应key
+        self.check_instruct_setting()
+
         self.ui.listWidget_instruct_area.takeItem(index)
 
     def start_instruct(self):
@@ -157,16 +167,32 @@ class Main(QMainWindow):
             instruct_widget.toolButton_state.setIcon(QIcon(icon_process))  # 修改状态的图标-执行
 
             # 将字典项转换为变量，用于后续调用函数
-            for key, value in instruct_data.items():
+            for key_arg, value in instruct_data.items():
                 convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
                 if type(value)is str and value in convert:
                     value = convert[value]
-                locals()[key] = value
+                locals()[key_arg] = value
 
             # 调用对应函数，相关变量已使用exec创建
             print(f'执行函数 {instruct_function}')
             print(f'参数 {instruct_data}')
-            exec(f'{instruct_function}')  # 备忘录 测试用
+            if command_type in ['匹配图片并移动', '匹配图片并点击']:
+                time_start = time.time()
+                retry_time = 60  # 寻图重试时间上限（默认60秒）
+                while True:
+                    time_process = time.time()-time_start
+                    if time_process > retry_time:
+                        break
+
+                    result = eval(f'{instruct_function}')  # 备忘录 测试用
+                    if result:  # 返回True则结束
+                        break
+                    else:  # 返回False则重试直至上限
+                        time.sleep(0.1)
+
+            else:
+                exec(f'{instruct_function}')  # 备忘录 测试用
+
             # try:
             #     exec(f'{instruct_function}')
             #     instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
@@ -175,9 +201,6 @@ class Main(QMainWindow):
             #     instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
             #     print("函数执行出错：", error_message)
             #     break  # 如果报错，退出循环
-
-
-
 
 
         self.ui.pushButton_start.setEnabled(True)
