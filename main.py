@@ -176,14 +176,16 @@ class Main(QMainWindow):
             # 调用对应函数，相关变量已使用exec创建
             print(f'执行函数 {instruct_function}')
             print(f'参数 {instruct_data}')
-            if command_type in ['匹配图片并移动', '匹配图片并点击']:
+            print(command_type)
+            if command_type in ['图像操作-匹配图片并移动', '图像操作-匹配图片并点击']:
+
                 time_start = time.time()
                 retry_time = 60  # 寻图重试时间上限（默认60秒）
                 while True:
+                    print('循环')
                     time_process = time.time()-time_start
                     if time_process > retry_time:
                         break
-
                     result = eval(f'{instruct_function}')  # 备忘录 测试用
                     if result:  # 返回True则结束
                         break

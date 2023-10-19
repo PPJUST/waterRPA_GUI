@@ -4,6 +4,9 @@ import string
 import time
 from typing import Tuple, Union
 
+import numpy
+from cv2 import  imdecode
+
 import pyautogui
 import pyperclip
 
@@ -13,6 +16,12 @@ _default_clicks: int = 1  # 默认点击次数
 _default_interval: float = 0.1  # 默认每次点击间隔时间
 _default_presses: int = 1  # 默认重复次数
 _default_confidence = 0.9  # 默认寻图精度
+
+def image_read_from_chinese_path(image_file_name):
+  # 将路径对应的图片转换为numpy图片对象（pyautogui库不支持中文名图片，需要通过numpy库中转）
+  image_numpy_data = imdecode(numpy.fromfile(image_file_name, dtype=numpy.uint8), -1)
+
+  return image_numpy_data
 
 
 class InstructMouse:
@@ -152,7 +161,8 @@ class InstructPic:
                                    ) -> Tuple[Union[int, None], Union[int, None]]:
         """获得在屏幕上第一个找到的文件图片的中心点坐标，如果没有找到则返回None
         confidence 为查找精度"""
-        position = pyautogui.locateCenterOnScreen(pic_file, confidence=confidence)
+        pic_file_to_image = image_read_from_chinese_path(pic_file)  # 转换为image对象，以处理中文名图片
+        position = pyautogui.locateCenterOnScreen(pic_file_to_image, confidence=confidence)
 
         if position:
             x, y = position.x, position.y
@@ -165,7 +175,8 @@ class InstructPic:
         """获得在屏幕上所有找到的文件图片的中心点坐标，如果没有找到则返回None
         返回的坐标格式为[(x, y), (x_1, y_2)]
         confidence 为查找精度"""
-        result = pyautogui.locateAllOnScreen(pic_file, confidence=confidence)
+        pic_file_to_image = image_read_from_chinese_path(pic_file)  # 转换为image对象，以处理中文名图片
+        result = pyautogui.locateAllOnScreen(pic_file_to_image, confidence=confidence)
         all_center_position = []
         for pos in result:
             mid_x = pos.left + pos.width // 2
