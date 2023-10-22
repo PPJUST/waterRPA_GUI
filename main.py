@@ -1,16 +1,14 @@
 import configparser
 import shutil
-import string
-import time
 
 import send2trash
+from PySide2.QtCore import QThread
 from PySide2.QtWidgets import QMainWindow, QListWidgetItem, QListWidget, QInputDialog, QMessageBox
 
+from constant_setting import *
 from instruct_function import *
 from instruct_line_widgets import *
 from ui_main import Ui_MainWindow
-from constant_setting import *
-
 
 
 class Main(QMainWindow):
@@ -96,7 +94,7 @@ class Main(QMainWindow):
         widget_instruct.setProperty('id', id_random)  # 设置命令行控件组的唯一id
         self.instruct_setting[id_random] = {}  # 创建对应的空键值对
         list_widget_item = QListWidgetItem()
-        resize = QSize(self.ui.listWidget_instruct_area.size().width() , 100)
+        resize = QSize(self.ui.listWidget_instruct_area.size().width(), 100)
         list_widget_item.setSizeHint(resize)  # 设置列表项的大小
         list_widget_item.setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsDragEnabled)  # 启用列表项的拖放支持
 
@@ -165,6 +163,8 @@ class Main(QMainWindow):
 
         total_command_number = self.ui.listWidget_instruct_area.count()
 
+        # 先获取全部需执行的指令信息，存放到一个字典中
+        command_data = {}  # 键为控件组id，值为对应的信息字典
         for i in range(total_command_number):
             item = self.ui.listWidget_instruct_area.item(i)
             instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
@@ -173,59 +173,37 @@ class Main(QMainWindow):
             instruct_function = command_link_dict[command_type]['function']  # 查表获取完整函数str
             instruct_data = self.instruct_setting[instruct_id]  # 根据id获取参数str
 
-            # 将字典项转换为变量，用于后续调用函数
-            for key_arg, value in instruct_data.items():
-                convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
-                if type(value)is str and value in convert:
-                    value = convert[value]
-                locals()[key_arg] = value
+            command_data[instruct_id] = {'id': instruct_id, 'command_type': command_type, 'function': instruct_function,
+                                         'data': instruct_data}
 
-            # 调用对应函数，相关变量已使用exec创建
-            print(f'执行函数 {instruct_function}')
-            print(f'参数 {instruct_data}')
-            if command_type in ['图像操作-匹配图片并移动', '图像操作-匹配图片并点击']:
-                time_start = time.time()
-                retry_time = 60  # 寻图重试时间上限（默认60秒）
-                is_find_pic = False  # 是否找到了图片
-                while True:
-                    time_process = time.time()-time_start
-                    if time_process > retry_time:
-                        break
-
-                    try:
-                        result = eval(f'{instruct_function}')
-                    except Exception as e:
-                        error_message = str(e)
-                        print("函数执行出错：", error_message)
-                        QMessageBox.warning(self, "错误", f"错误信息：【{error_message}】")
-                        break  # 如果报错，退出循环
-
-                    if result:  # 返回True则结束
-                        is_find_pic = True
-                        break
-                    else:  # 返回False则重试直至上限
-                        time.sleep(0.1)
-
-                if is_find_pic:
-                    instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
-                else:  # 未找到图片则提醒并退出总循环
-                    instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
-                    break
-
-            else:
-                try:
-                    exec(f'{instruct_function}')
-                    instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
-                except Exception as e:
-                    instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
-                    error_message = str(e)
-                    print("函数执行出错：", error_message)
-                    QMessageBox.warning(self,"错误",f"错误信息：【{error_message}】")
-                    break  # 如果报错，退出循环
-
+        # 将获取的完整字典发送给qthread，防止卡ui
+        self.qthread = QthreadStart(command_data)
+        self.qthread.signal_succeed.connect(self.qthread_run_succeed)
+        self.qthread.signal_failed.connect(self.qthread_run_failed)
+        self.qthread.start()
 
         self.ui.pushButton_start.setEnabled(True)
         self.ui.pushButton_stop.setEnabled(False)
+
+    def qthread_run_succeed(self, current_id):
+        for i in range(self.ui.listWidget_instruct_area.count()):
+            item = self.ui.listWidget_instruct_area.item(i)
+            instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
+            instruct_id = instruct_widget.property('id')  # 获取控件组id
+
+            if instruct_id == current_id:
+                instruct_widget.toolButton_state.setIcon(QIcon(icon_complete))  # 修改状态的图标-完成
+                break
+
+    def qthread_run_failed(self, current_id):
+        for i in range(self.ui.listWidget_instruct_area.count()):
+            item = self.ui.listWidget_instruct_area.item(i)
+            instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
+            instruct_id = instruct_widget.property('id')  # 获取控件组id
+
+            if instruct_id == current_id:
+                instruct_widget.toolButton_state.setIcon(QIcon(icon_error))  # 修改状态的图标-错误
+                break
 
     def stop_instruct(self):
         """中止指令"""
@@ -249,7 +227,7 @@ class Main(QMainWindow):
         if self.ui.comboBox_select_config.count() == 0:
             self.add_config(new_config='默认')
 
-    def add_config(self, new_config:str =None):
+    def add_config(self, new_config: str = None):
         """新建配置文件"""
         configs = os.listdir('config')
         if not new_config:
@@ -272,15 +250,11 @@ class Main(QMainWindow):
 
         # 弹出确认对话框
 
-        reply = QMessageBox.warning(self,"删除配置文件",f"是否删除【{del_config}】",QMessageBox.Yes,QMessageBox.No)
+        reply = QMessageBox.warning(self, "删除配置文件", f"是否删除【{del_config}】", QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             send2trash.send2trash(f'config/{del_config}')
             self.load_config_to_combobox()
-
-
-
-
 
     @staticmethod
     def check_default_config():
@@ -324,14 +298,80 @@ loop_time = 1"""
                     if parent_folder == check_folder:
                         current_config = self.ui.comboBox_select_config.currentText()
                         pic_name = os.path.split(value)[1]
-                        config_path = os.path.join(os.getcwd(),'config',current_config)
-                        new_pic_file = os.path.normpath(os.path.join(config_path,pic_name))
-                        print(new_pic_file)
+                        config_path = os.path.join(os.getcwd(), 'config', current_config)
+                        new_pic_file = os.path.normpath(os.path.join(config_path, pic_name))
                         shutil.copyfile(value, new_pic_file)
                         value = new_pic_file
                 config.set(str(i), str(key), str(value))
 
         config.write(open(path, 'w', encoding='utf-8'))
+
+
+class QthreadStart(QThread):
+    signal_succeed = Signal(str)  # 发送执行成功的控件组id
+    signal_failed = Signal(str)  # 发送执行失败的控件组id
+
+    def __init__(self, command_data: dict, parent=None):
+        super().__init__(parent)
+        self.command_data = command_data
+
+    def run(self):
+        for data in self.command_data.values():
+            instruct_data = data['data']
+            command_type = data['command_type']
+            instruct_function = data['function']
+            instruct_id = data['id']
+
+            print(
+                f'当前执行子线程信息\n,id：{instruct_id}\n中文指令：{command_type}\n执行函数：{instruct_function}\n函数参数{instruct_data}')
+
+            # 将字典项转换为变量，用于后续调用函数
+            for key_arg, value in instruct_data.items():
+                convert = {'左键': 'left', '右键': 'right', '中键': 'middle'}  # 转换为pyautogui支持的文本
+                if type(value) is str and value in convert:
+                    value = convert[value]
+                locals()[key_arg] = value
+
+            # 调用对应函数，相关变量已使用exec创建
+            if command_type in ['图像操作-匹配图片并移动', '图像操作-匹配图片并点击']:
+                time_start = time.time()
+                retry_time = 60  # 寻图重试时间上限（默认60秒）
+                is_find_pic = False  # 是否找到了图片
+                while True:
+                    time_process = time.time() - time_start
+                    if time_process > retry_time:
+                        break
+
+                    try:
+                        result = eval(f'{instruct_function}')
+                    except Exception as e:
+                        error_message = str(e)
+                        print("函数执行出错：", error_message)
+                        QMessageBox.warning(self, "错误", f"错误信息：【{error_message}】")
+                        break  # 如果报错，退出循环
+
+                    if result:  # 返回True则结束
+                        is_find_pic = True
+                        break
+                    else:  # 返回False则重试直至上限
+                        time.sleep(0.1)
+
+                if is_find_pic:
+                    self.signal_succeed.emit(instruct_id)
+                else:  # 未找到图片则提醒并退出总循环
+                    self.signal_failed.emit(instruct_id)
+                    break
+
+            else:
+                try:
+                    exec(f'{instruct_function}')
+                    self.signal_succeed.emit(instruct_id)
+                except Exception as e:
+                    self.signal_failed.emit(instruct_id)
+                    error_message = str(e)
+                    print("函数执行出错：", error_message)
+                    QMessageBox.warning(self, "错误", f"错误信息：【{error_message}】")
+                    break
 
 
 def main():
