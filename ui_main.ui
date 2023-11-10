@@ -164,7 +164,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>简单说明</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1.运行次数为0时，为无限循环。&lt;/p&gt;&lt;p&gt;2.鼠标移至屏幕最左上角时，可强制终止运行（运行等待指令时除外）。&lt;/p&gt;&lt;p&gt;3. 强制停止后需要再次点击停止按钮。&lt;/p&gt;&lt;p&gt;4.拖动指令时，请拖动至另一个指令的下半部分，否则会原指令会被清空&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>

@@ -22,14 +22,26 @@ class Main(QMainWindow):
         """
         self.instruct_setting = dict()  # 存放各个命令行的参数设置，格式为{命令行id:{args_dict数据},...}
         self.check_default_config()
+
+        # 设置控件属性
         self.ui.listWidget_instruct_area.setDragEnabled(True)  # 启用拖动功能
         self.ui.listWidget_instruct_area.setDragDropMode(QListWidget.InternalMove)  # 设置拖放模式为内部移动
         self.ui.listWidget_instruct_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)  # 禁止水平滚动条
+        self.ui.listWidget_instruct_area.setDefaultDropAction(Qt.TargetMoveAction)
+        self.ui.listWidget_instruct_area.itemMoved.connect(self.save_config)
 
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
         self.load_config_to_combobox()  # 加载配置文件到comboBox
+        self.load_loop_time()  # 加载循环次数
         if self.ui.listWidget_instruct_area.count() == 0:
             self.insert_instruct_line_widgets()  # 生成一个初始控件组
+        self.run_time = 0  # 已运行次数，用于循环运行
+
+        # 实例化子线程
+        self.qthread = QthreadStart()
+        self.qthread.signal_succeed.connect(self.qthread_run_succeed)
+        self.qthread.signal_failed.connect(self.qthread_run_failed)
+        self.qthread.signal_end.connect(self.loop_run)
 
         """
         连接信号与槽函数
@@ -38,15 +50,22 @@ class Main(QMainWindow):
         self.ui.toolButton_save_config.clicked.connect(self.save_config)
         self.ui.toolButton_add_config.clicked.connect(self.add_config)
         self.ui.toolButton_delete_config.clicked.connect(self.delete_config)
+        self.ui.spinBox_loop_time.valueChanged.connect(self.change_loop_time)
         # 功能区
+        self.ui.pushButton_start.clicked.connect(self.reset_run_time)
         self.ui.pushButton_start.clicked.connect(self.start_instruct)
         self.ui.pushButton_stop.clicked.connect(self.stop_instruct)
+
+    def reset_run_time(self):
+        """重置已运行次数"""
+        self.run_time = 0
 
     def get_args(self, args_dict):
         """接收传递的信号"""
         instruct_id = self.sender().property('id')
         self.instruct_setting[instruct_id] = args_dict
         self.check_instruct_setting()
+        self.save_config()
 
     def check_instruct_setting(self):
         """检查存储的指令参数设置，判断是否启用执行按钮"""
@@ -106,11 +125,33 @@ class Main(QMainWindow):
 
         # 内部控件连接槽函数
         widget_instruct.toolButton_add_instruct.clicked.connect(self.insert_instruct_line_widgets)
+        widget_instruct.toolButton_copy_instruct.clicked.connect(self.copy_instruct_line_widgets)
         widget_instruct.toolButton_delete_instruct.clicked.connect(self.delete_instruct_line_widgets)
 
         widget_instruct.signal_send_args.connect(self.get_args)
         if args_dict_config:
             widget_instruct.child_widget_command.send_args()  # 手工执行一次子控件的发送信号函数，用于初始化
+
+    def copy_instruct_line_widgets(self):
+        """复制指令行控件组"""
+        # 计算当前索引
+        if self.sender():
+            index = self.get_index_of_current_widgets(self.sender())
+            if index is None:
+                index = self.ui.listWidget_instruct_area.count()
+        else:
+            index = self.ui.listWidget_instruct_area.count()
+
+        # 提取配置文件中的设置
+        current_config = self.ui.comboBox_select_config.currentText()
+        config = configparser.ConfigParser()
+        config.read(f'config/{current_config}/setting.ini', encoding='utf-8')  # 配置文件的路径
+        args_dict_config = {}
+        keys = config.options(str(index))
+        for key in keys:
+            args_dict_config[key] = config.get(str(index), key)
+
+        self.insert_instruct_line_widgets(args_dict_config)
 
     def get_index_of_current_widgets(self, sender, position='in_instruct'):
         """获取当前操作的控件在控件区中的索引号
@@ -153,11 +194,25 @@ class Main(QMainWindow):
             instruct_widget = self.ui.listWidget_instruct_area.itemWidget(item)  # 获取控件组对象
             instruct_widget.toolButton_state.setIcon(QIcon(icon_process))  # 修改状态的图标-执行
 
+    def loop_run(self):
+        self.run_time += 1  # 运行次数+1
+        total_loop_time = self.ui.spinBox_loop_time.value()
+        if total_loop_time == 0:
+            self.start_instruct()
+        else:
+            if self.run_time < total_loop_time:
+                self.start_instruct()
+            else:
+                self.ui.pushButton_start.setEnabled(True)
+                self.ui.spinBox_loop_time.setEnabled(True)
+                self.ui.pushButton_stop.setEnabled(False)
+
     def start_instruct(self):
         """执行指令"""
         self.save_config()  # 执行前先保存一次
 
         self.ui.pushButton_start.setEnabled(False)
+        self.ui.spinBox_loop_time.setEnabled(False)
         self.ui.pushButton_stop.setEnabled(True)
         self.reset_state_icon()  # 重置状态图标
 
@@ -177,13 +232,8 @@ class Main(QMainWindow):
                                          'data': instruct_data}
 
         # 将获取的完整字典发送给qthread，防止卡ui
-        self.qthread = QthreadStart(command_data)
-        self.qthread.signal_succeed.connect(self.qthread_run_succeed)
-        self.qthread.signal_failed.connect(self.qthread_run_failed)
+        self.qthread.set_command_data(command_data)
         self.qthread.start()
-
-        self.ui.pushButton_start.setEnabled(True)
-        self.ui.pushButton_stop.setEnabled(False)
 
     def qthread_run_succeed(self, current_id):
         for i in range(self.ui.listWidget_instruct_area.count()):
@@ -208,6 +258,7 @@ class Main(QMainWindow):
     def stop_instruct(self):
         """中止指令"""
         self.ui.pushButton_start.setEnabled(True)
+        self.ui.spinBox_loop_time.setEnabled(True)
         self.ui.pushButton_stop.setEnabled(False)
 
         pyautogui.moveTo(0, 0)
@@ -306,13 +357,34 @@ loop_time = 1"""
 
         config.write(open(path, 'w', encoding='utf-8'))
 
+    def change_loop_time(self):
+        """修改总循环次数"""
+        loop_time = self.ui.spinBox_loop_time.value()
+        config = configparser.ConfigParser()
+        config.read('config/global.ini', encoding='utf-8')  # 配置文件的路径
+        config.set('DEFAULT', 'loop_time', str(loop_time))
+        config.write(open('config/global.ini', 'w', encoding='utf-8'))
+
+    def load_loop_time(self):
+        """加载循环次数"""
+        config = configparser.ConfigParser()
+        config.read('config/global.ini', encoding='utf-8')  # 配置文件的路径
+        loop_time = config.get('DEFAULT', 'loop_time')
+
+        self.ui.spinBox_loop_time.setValue(int(loop_time))
+
 
 class QthreadStart(QThread):
     signal_succeed = Signal(str)  # 发送执行成功的控件组id
     signal_failed = Signal(str)  # 发送执行失败的控件组id
+    signal_end = Signal()  # 执行完成后发送信号
 
-    def __init__(self, command_data: dict, parent=None):
+    def __init__(self, parent=None):
         super().__init__(parent)
+        self.command_data = {}
+
+    def set_command_data(self, command_data):
+        """设置参数"""
         self.command_data = command_data
 
     def run(self):
@@ -372,6 +444,8 @@ class QthreadStart(QThread):
                     print("函数执行出错：", error_message)
                     QMessageBox.warning(self, "错误", f"错误信息：【{error_message}】")
                     break
+
+        self.signal_end.emit()
 
 
 def main():

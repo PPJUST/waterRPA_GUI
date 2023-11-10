@@ -8,6 +8,9 @@ icon_edit = r'icon/edit.png'
 icon_process = r'icon/process.png'
 icon_complete = r'icon/complete.png'
 icon_error = r'icon/error.png'
+icon_add = r'icon/add.png'
+icon_copy = r'icon/copy.png'
+icon_del = r'icon/del.png'
 
 """
 错误参数ui的提示格式
