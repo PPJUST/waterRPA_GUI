@@ -1,0 +1,7 @@
+filetype==1.2.0
+numpy==1.25.0
+opencv_python==4.8.1.78
+PyAutoGUI==0.9.54
+pyperclip==1.8.2
+PySide2==5.15.2.1
+Send2Trash==1.8.0
