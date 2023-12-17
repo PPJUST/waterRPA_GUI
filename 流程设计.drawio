@@ -1,0 +1,206 @@
+<mxfile host="app.diagrams.net" modified="2023-10-16T12:46:13.874Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36 Edg/118.0.2088.46" etag="pGqwGrdCv6JLMU-0fPch" version="22.0.4" type="device">
+  <diagram name="第 1 页" id="JOwxWNfSDe6Fp6OJW6yT">
+    <mxGraphModel dx="664" dy="492" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-1" target="jI5lMM9N3FI82g3AAYL5-4" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-1" value="程序自动创建空白指令行控件组" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="20" y="286.25" width="120" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-4" target="jI5lMM9N3FI82g3AAYL5-6" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-4" value="用户选择指令" style="rhombus;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="190" y="260" width="102.5" height="102.5" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-9" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-6" target="jI5lMM9N3FI82g3AAYL5-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-6" value="程序更新对应设置控件" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="178" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-8" target="jI5lMM9N3FI82g3AAYL5-18" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-8" target="jI5lMM9N3FI82g3AAYL5-10" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-53" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-8" target="jI5lMM9N3FI82g3AAYL5-38" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-54" value="每次变动，各个子模块发送信号" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-53" vertex="1" connectable="0">
+          <mxGeometry x="0.6689" y="3" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-8" value="用户对参数进行设置" style="rhombus;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="350" y="385" width="135" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-10" target="jI5lMM9N3FI82g3AAYL5-8" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-32" value="参数不规范，错误项红色提示" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-31" vertex="1" connectable="0">
+          <mxGeometry x="-0.52" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-35" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-10" target="jI5lMM9N3FI82g3AAYL5-34" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-36" value="全部参数符合规范按钮" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-35" vertex="1" connectable="0">
+          <mxGeometry x="-0.15" y="-2" relative="1" as="geometry">
+            <mxPoint x="6" y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-10" value="程序自动检查参数的规范" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="540" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-22" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-18" target="jI5lMM9N3FI82g3AAYL5-21" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-18" value="用户点击保存按钮" style="rhombus;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="355.63" y="630" width="123.75" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-57" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-21" target="jI5lMM9N3FI82g3AAYL5-38" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="640" y="800" />
+              <mxPoint x="200" y="800" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-58" value="读取设置" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-57" vertex="1" connectable="0">
+          <mxGeometry x="-0.1774" y="-3" relative="1" as="geometry">
+            <mxPoint x="160" y="-37" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-21" value="程序存储指令参数至配置文件（不论是否规范）" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="560" y="645" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-45" value="" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-34" target="jI5lMM9N3FI82g3AAYL5-44" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-49" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-34" target="jI5lMM9N3FI82g3AAYL5-21" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-50" value="存储当前配置" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-49" vertex="1" connectable="0">
+          <mxGeometry x="-0.4836" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-34" value="启动执行按钮" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="810" y="490" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-38" value="程序在内存中更新参数设置" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="160" y="635" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-60" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-44" target="jI5lMM9N3FI82g3AAYL5-59" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-44" value="用户正式执行" style="shape=step;perimeter=stepPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rounded=1;direction=north;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="1030" y="460" width="80" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-71" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-59" target="jI5lMM9N3FI82g3AAYL5-63" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-75" value="指令执行成功" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-71" vertex="1" connectable="0">
+          <mxGeometry x="0.658" y="-4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-73" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=13;" parent="1" source="jI5lMM9N3FI82g3AAYL5-59" target="jI5lMM9N3FI82g3AAYL5-66" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-74" value="指令执行失败" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];fontSize=13;" parent="jI5lMM9N3FI82g3AAYL5-73" vertex="1" connectable="0">
+          <mxGeometry x="0.3524" y="4" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-59" value="程序逐行执行指令" style="rounded=1;whiteSpace=wrap;html=1;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="1010" y="286.25" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-63" value="指令行打钩，并继续执行" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="770" y="60" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="jI5lMM9N3FI82g3AAYL5-66" value="指令行打叉，并中止执行" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="770" y="190" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-1" value="程序运行逻辑" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#82b366;fillColor=#d5e8d4;fontSize=20;" parent="1" vertex="1">
+          <mxGeometry x="90" y="173" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-3" value="参数传递说明" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=#82b366;fillColor=#d5e8d4;fontSize=20;" parent="1" vertex="1">
+          <mxGeometry x="1320" y="80" width="140" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-21" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;" parent="1" source="6GDg1csXS4ncgFogEa_k-7" target="6GDg1csXS4ncgFogEa_k-20" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-22" value="用户选择指令后，自动创建，并设置唯一标识" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="6GDg1csXS4ncgFogEa_k-21" vertex="1" connectable="0">
+          <mxGeometry x="0.1444" y="-5" relative="1" as="geometry">
+            <mxPoint x="5" y="-15" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" edge="1" parent="1" source="6GDg1csXS4ncgFogEa_k-7" target="6GDg1csXS4ncgFogEa_k-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-7" value="命令行控件组接收信号后，发送相同信号，并且附带当前命令行的唯一标识，覆盖对应的数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="UXIWO0Hs2Kb7eMP6og08-6">
+          <mxGeometry x="-0.1935" y="-3" relative="1" as="geometry">
+            <mxPoint x="25" y="-6" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-19" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="6GDg1csXS4ncgFogEa_k-7" target="UXIWO0Hs2Kb7eMP6og08-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-7" value="命令行控件组" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="1470" y="175.5" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-8" value="内存中存储的参数设置，存储每个命令行的数据" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="2140" y="175.5" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-9" value="" style="endArrow=classic;html=1;rounded=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" target="6GDg1csXS4ncgFogEa_k-7" edge="1">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="1510" y="62.5" as="sourcePoint" />
+            <mxPoint x="1550" y="32.5" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-10" value="程序自动创建" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" parent="1" vertex="1">
+          <mxGeometry x="1460" y="22.5" width="100" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-4" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="6GDg1csXS4ncgFogEa_k-20" target="6GDg1csXS4ncgFogEa_k-7">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1670" y="397.5" />
+              <mxPoint x="1670" y="235.5" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-5" value="用户修改时，命令行控件组接收修改信号与数据" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="UXIWO0Hs2Kb7eMP6og08-4">
+          <mxGeometry x="0.0597" y="-5" relative="1" as="geometry">
+            <mxPoint y="28" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="6GDg1csXS4ncgFogEa_k-20" value="指令行控件" style="whiteSpace=wrap;html=1;aspect=fixed;" parent="1" vertex="1">
+          <mxGeometry x="1470" y="357.5" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-23" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="UXIWO0Hs2Kb7eMP6og08-18" target="6GDg1csXS4ncgFogEa_k-20">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1880" y="520" />
+              <mxPoint x="1510" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-24" value="自动创建，并设置唯一标识" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="UXIWO0Hs2Kb7eMP6og08-23">
+          <mxGeometry x="0.1908" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UXIWO0Hs2Kb7eMP6og08-18" value="减少、新增命令行控件组" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1840" y="347.5" width="80" height="80" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
