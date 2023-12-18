@@ -41,6 +41,7 @@ class WidgetCommandControl(QWidget):
         self.comboBox_select_command = QComboBox()
         self.comboBox_select_command.addItems(list(command_chs_to_en_dict.keys()))
         self.comboBox_select_command.setSizeAdjustPolicy(QComboBox.AdjustToContents)  # 设置为自适应大小
+        setattr(self.comboBox_select_command, "wheelEvent", lambda a: None)  # 禁用滚轮事件
         self.horizontalLayout.addWidget(self.comboBox_select_command)
 
         self.widget_command_setting = QWidget()
