@@ -79,6 +79,7 @@ class Main(QMainWindow):
 
     def get_args_signal(self, args_dict):
         """接收子控件传递的信号"""
+        print(f'接收信号 {args_dict}')
         id_widget = self.sender().property('id')
         self.command_dict[id_widget] = args_dict
         self.check_command_all_right()

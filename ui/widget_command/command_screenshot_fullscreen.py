@@ -1,3 +1,5 @@
+from PySide6.QtWidgets import *
+
 from module.constant_default import *
 from module.function_general import *
 

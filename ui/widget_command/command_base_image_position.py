@@ -1,12 +1,45 @@
+import os
+
+import filetype
 from PySide6.QtGui import *
+from PySide6.QtWidgets import *
 
 from module.function_config import *
 from ui import widget_screenshot
 
 
-class HBoxLayoutGroup(QHBoxLayout):
+class DropLabel(QLabel):
+    """自定义QLabel控件
+    拖入【文件夹】/【文件】到QLabel中后，发送所有拖入路径的list信号
+    发送信号 signal_dropped(list)"""
+    signal_dropped = Signal(str)  # 发送拖入的所有路径list
+
     def __init__(self):
         super().__init__()
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+        if event.mimeData().hasUrls():
+            event.accept()
+
+    def dropEvent(self, event):
+        if event.mimeData().hasUrls():
+            urls = event.mimeData().urls()
+            drop_path_list = [url.toLocalFile() for url in urls]  # 获取多个文件的路径的列表
+            first_path = drop_path_list[0]
+            if os.path.isfile(first_path) and filetype.is_image(first_path):
+                self.signal_dropped.emit(first_path)
+
+
+class HBoxLayoutGroup1(QHBoxLayout):
+    """组1"""
+    signal_args_changed = Signal()  # 值变更后发送信号
+
+    def __init__(self):
+        super().__init__()
+        """
+        设置ui
+        """
         self.label = QLabel()
         self.label.setText('匹配图片')
         self.addWidget(self.label)
@@ -53,55 +86,20 @@ class HBoxLayoutGroup(QHBoxLayout):
         self.toolButton_screenshot.setText('截图')
         self.addWidget(self.toolButton_screenshot)
 
-
-class CommandMoveToPicPosition(QWidget):
-    signal_args = Signal(dict)
-
-    def __init__(self, set_layout=True):
-        super().__init__()
         """
-        ui设置
-        """
-        self.ui = HBoxLayoutGroup()
-        if set_layout:  # 作为父类时不调用
-            self.setLayout(self.ui)
-        # 重新赋值控件对象
-        self.toolButton_choose_pic = self.ui.toolButton_choose_pic
-        self.toolButton_screenshot = self.ui.toolButton_screenshot
-        self.label_show_pic = self.ui.label_show_pic
-        self.doubleSpinBox_duration = self.ui.doubleSpinBox_duration
-        self.comboBox_find_model = self.ui.comboBox_find_model
-
-        """
-        初始化
-        """
-        self.args_dict = default_args_dict.copy()
-        self.check_args()
-        if set_layout:  # 作为父类时不调用
-            self.send_args()
-
-        """
-        槽函数设置
+        设置槽函数
         """
         self.toolButton_choose_pic.clicked.connect(self.choose_pic)
         self.toolButton_screenshot.clicked.connect(self.screenshot)
         self.label_show_pic.signal_dropped.connect(self.drop_image)
-        self.label_show_pic.signal_dropped.connect(self.check_args)
-        self.label_show_pic.signal_dropped.connect(self.send_args)
-        self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
-        self.comboBox_find_model.currentTextChanged.connect(self.send_args)
+        # 设置值变更的信号
+        self.label_show_pic.signal_dropped.connect(self.args_changed)
+        self.doubleSpinBox_duration.valueChanged.connect(self.args_changed)
+        self.comboBox_find_model.currentTextChanged.connect(self.args_changed)
 
-    def load_args(self, args_dict):
-        """加载参数设置"""
-        self.args_dict = args_dict
-        duration = args_dict['duration']
-        mode_find_image = args_dict['mode_find_image']
-        screenshot_image_path = args_dict['screenshot_image_path']
-        self.doubleSpinBox_duration.setValue(duration)
-        self.comboBox_find_model.setCurrentText(mode_find_image)
-
-        if screenshot_image_path and os.path.exists(screenshot_image_path) and filetype.is_image(screenshot_image_path):
-            self.choose_pic(screenshot_image_path)
+    def args_changed(self):
+        """值变更后发送信号"""
+        self.signal_args_changed.emit()
 
     def drop_image(self, image_path):
         """响应拖入图片的信号"""
@@ -111,7 +109,8 @@ class CommandMoveToPicPosition(QWidget):
         """弹出文件对话框选择图片，并设置label属性
         可传入image_path参数来跳过对话框"""
         if not image_path:
-            image_path, _ = QFileDialog.getOpenFileName(self, "选择图片", "/", "图片文件(*.png *.jpg *.bmp)")
+            image_path, _ = QFileDialog.getOpenFileName(self.parentWidget(), "选择图片", "/",
+                                                        "图片文件(*.png *.jpg *.bmp)")
 
         if image_path:
             self.label_show_pic.setProperty('image_path', image_path)
@@ -120,8 +119,7 @@ class CommandMoveToPicPosition(QWidget):
             pixmap = pixmap.scaled(resize)
             self.label_show_pic.setPixmap(pixmap)
 
-            self.check_args()
-            self.send_args()
+        self.args_changed()  # 发送信号
 
     def screenshot(self):
         """截屏"""
@@ -146,29 +144,55 @@ class CommandMoveToPicPosition(QWidget):
 
         self.choose_pic(save_pic_file)
 
-    def check_args(self):
-        """检查参数规范"""
-        pic_file = self.label_show_pic.property('image_path')
-        if not pic_file or not os.path.exists(pic_file) or not filetype.is_image(pic_file):
-            self.args_dict['args_all_right'] = False
-            self.label_show_pic.setStyleSheet(error_stylesheet_border)
-        else:
-            self.args_dict['args_all_right'] = True
-            self.label_show_pic.setStyleSheet('')
 
-    def send_args(self):
-        """发送参数设置"""
-        mode_find_image = self.comboBox_find_model.currentText()
-        duration = self.doubleSpinBox_duration.value()
-        self.args_dict['mode_find_image'] = mode_find_image
-        self.args_dict['duration'] = duration
+class HBoxLayoutGroup2(QHBoxLayout):
+    """组2"""
+    signal_args_changed = Signal()  # 值变更后发送信号
 
-        image_path_property = self.label_show_pic.property('image_path')
-        screenshot_image_path = image_path_property if image_path_property else ''  # 不能是None
-        if screenshot_image_path:
-            self.args_dict['screenshot_image_path'] = screenshot_image_path
+    def __init__(self):
+        super().__init__()
+        """设置ui"""
+        self.label_5 = QLabel()
+        self.label_5.setText('并点击')
+        self.addWidget(self.label_5)
 
-        self.signal_args.emit(self.args_dict)
+        self.comboBox_button = QComboBox()
+        self.comboBox_button.addItems(['左键', '右键', '中键'])
+        self.comboBox_button.setCurrentText(default_button)
+        self.addWidget(self.comboBox_button)
+
+        self.spinBox_clicks = QSpinBox()
+        self.spinBox_clicks.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_clicks.setValue(default_clicks)
+        self.spinBox_clicks.setMinimum(1)
+        self.spinBox_clicks.setMaximum(max_clicks)
+        self.addWidget(self.spinBox_clicks)
+
+        self.label_6 = QLabel()
+        self.label_6.setText('次，每次点击间隔')
+        self.addWidget(self.label_6)
+
+        self.doubleSpinBox_interval = QDoubleSpinBox()
+        self.doubleSpinBox_interval.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.doubleSpinBox_interval.setMaximum(max_interval)
+        self.doubleSpinBox_interval.setValue(default_interval)
+        self.addWidget(self.doubleSpinBox_interval)
+
+        self.label_7 = QLabel()
+        self.label_7.setText('秒')
+        self.addWidget(self.label_7)
+
+        """
+        设置槽函数
+        """
+        # 设置值变更的信号
+        self.comboBox_button.currentTextChanged.connect(self.args_changed)
+        self.spinBox_clicks.valueChanged.connect(self.args_changed)
+        self.doubleSpinBox_interval.valueChanged.connect(self.args_changed)
+
+    def args_changed(self):
+        """值变更后发送信号"""
+        self.signal_args_changed.emit()
 
 
 def _test_widget():
@@ -176,11 +200,9 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = CommandMoveToPicPosition()
+    test = HBoxLayoutGroup1()
     # -------------
-    layout = QVBoxLayout()
-    layout.addWidget(test)
-    window.setLayout(layout)
+    window.setLayout(test)
     window.show()
     app.exec_()
 

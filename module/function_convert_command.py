@@ -17,7 +17,7 @@ import ui.widget_command.command_mouse_move as command_mouse_move
 import ui.widget_command.command_mouse_press as command_mouse_press
 import ui.widget_command.command_mouse_release as command_mouse_release
 import ui.widget_command.command_mouse_scroll as command_mouse_scroll
-import ui.widget_command.command_move_to_pic_position as command_move_to_pic_position
+import ui.widget_command.command_move_to_image_position as command_move_to_image_position
 import ui.widget_command.command_paste_text as command_paste_text
 import ui.widget_command.command_screenshot_fullscreen as command_screenshot_fullscreen
 import ui.widget_command.command_wait_time_random as command_wait_time_random

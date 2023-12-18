@@ -1,12 +1,9 @@
 """通用方法"""
-import os
 import random
 import string
 from typing import Union
 
-import filetype
 from PySide6.QtCore import *
-from PySide6.QtWidgets import *
 
 
 def check_filename_feasible(filename: str, replace: bool = False) -> Union[str, bool]:
@@ -34,29 +31,6 @@ def check_filename_feasible(filename: str, replace: bool = False) -> Union[str, 
             filename = filename[1:]
 
         return filename.strip()
-
-
-class DropLabel(QLabel):
-    """自定义QLabel控件
-    拖入【文件夹】/【文件】到QLabel中后，发送所有拖入路径的list信号
-    发送信号 signal_dropped(list)"""
-    signal_dropped = Signal(str)  # 发送拖入的所有路径list
-
-    def __init__(self):
-        super().__init__()
-        self.setAcceptDrops(True)
-
-    def dragEnterEvent(self, event):
-        if event.mimeData().hasUrls():
-            event.accept()
-
-    def dropEvent(self, event):
-        if event.mimeData().hasUrls():
-            urls = event.mimeData().urls()
-            drop_path_list = [url.toLocalFile() for url in urls]  # 获取多个文件的路径的列表
-            first_path = drop_path_list[0]
-            if os.path.isfile(first_path) and filetype.is_image(first_path):
-                self.signal_dropped.emit(first_path)
 
 
 def create_random_string(length: int = 16) -> str:

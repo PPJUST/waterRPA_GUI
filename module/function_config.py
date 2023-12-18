@@ -4,6 +4,7 @@
 一个配置文件为一个文件夹，文件夹名即为配置名，内部一个ini和截图文件"""
 
 import configparser
+import os
 
 import send2trash
 
