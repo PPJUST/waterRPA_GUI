@@ -77,7 +77,7 @@ def convert_to_ad():
         event_type = d_list[1]
         event_args = d_list[2]
         # 提取数据
-        time_difference = time_local - last_time
+        time_difference = round(time_local - last_time, 2)
         if time_difference > 10000:  # 处理第一个时间差值
             time_difference = 0.25
         last_time = time_local
