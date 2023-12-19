@@ -79,7 +79,7 @@ def convert_to_ad():
         # 提取数据
         time_difference = time_local - last_time
         if time_difference > 10000:  # 处理第一个时间差值
-            time_difference = 1
+            time_difference = 0.25
         last_time = time_local
         x = int(event_args['x'])
         y = int(event_args['y'])

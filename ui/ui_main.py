@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'ui_mainkSJsSR.ui'
+## Form generated from reading UI file 'ui_mainfXrRtD.ui'
 ##
 ## Created by: Qt User Interface Compiler version 6.5.3
 ##
@@ -197,7 +197,7 @@ class Ui_MainWindow(object):
         self.pushButton_stop.setText(QCoreApplication.translate("MainWindow", u"\u505c\u6b62", None))
         self.pushButton_listener.setText(QCoreApplication.translate("MainWindow", u"\u5f55\u5236", None))
         self.groupBox_info.setTitle(QCoreApplication.translate("MainWindow", u"\u8bf4\u660e", None))
-        self.label_2.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>1.\u5168\u5c40\u8bbe\u7f6e-\u8fd0\u884c\u6b21\u6570\uff1a\u4e3a0\u65f6\uff0c\u4e3a\u65e0\u9650\u5faa\u73af\u3002</p><p>2.\u5168\u5c40-\u6307\u4ee4\u95f4\u9694\uff1a\u6bcf\u884c\u6307\u4ee4\u6267\u884c\u7684\u95f4\u9694\u65f6\u95f4\u3002</p><p>3.\u5168\u5c40-\u5bfb\u56fe\u8d85\u65f6\u65f6\u95f4\uff1a\u641c\u7d22\u6307\u5b9a\u56fe\u7247\u65f6\u7684\u8d85\u65f6\u65f6\u95f4\uff0c\u8d85\u8fc7\u5219\u7ec8\u6b62\u3002</p><p>4.\u9f20\u6807\u79fb\u81f3\u5c4f\u5e55\u6700\u5de6\u4e0a\u89d2\u65f6\uff0c\u53ef\u5f3a\u5236\u7ec8\u6b62\u8fd0\u884c\uff08\u8fd0\u884c\u7b49\u5f85\u6307\u4ee4\u65f6\u9664\u5916\uff09\u3002</p></body></html>", None))
+        self.label_2.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>1.\u5168\u5c40\u8bbe\u7f6e-\u8fd0\u884c\u6b21\u6570\uff1a\u4e3a0\u65f6\uff0c\u4e3a\u65e0\u9650\u5faa\u73af\u3002</p><p>2.\u5168\u5c40\u8bbe\u7f6e-\u6307\u4ee4\u95f4\u9694\uff1a\u6bcf\u884c\u6307\u4ee4\u6267\u884c\u7684\u95f4\u9694\u65f6\u95f4\u3002</p><p>3.\u5168\u5c40\u8bbe\u7f6e-\u5bfb\u56fe\u8d85\u65f6\u65f6\u95f4\uff1a\u641c\u7d22\u6307\u5b9a\u56fe\u7247\u65f6\u7684\u8d85\u65f6\u65f6\u95f4\uff0c\u8d85\u8fc7\u5219\u7ec8\u6b62\u3002</p><p>4.\u9f20\u6807\u79fb\u81f3\u5c4f\u5e55\u6700\u5de6\u4e0a\u89d2\u65f6\uff0c\u53ef\u5f3a\u5236\u7ec8\u6b62\u8fd0\u884c\uff08\u8fd0\u884c\u7b49\u5f85\u6307\u4ee4\u65f6\u9664\u5916\uff09\u3002</p><p>5.\u5f55\u5236\u64cd\u4f5c\u540e\uff0c\u8bf7\u6ce8\u610f\u5168\u5c40\u8bbe\u7f6e-\u6307\u4ee4\u95f4\u9694\u3002</p></body></html>", None))
         self.groupBox_setting.setTitle(QCoreApplication.translate("MainWindow", u"\u5168\u5c40\u8bbe\u7f6e", None))
         self.label_3.setText(QCoreApplication.translate("MainWindow", u"\u6307\u4ee4\u95f4\u9694/\u79d2", None))
         self.label.setText(QCoreApplication.translate("MainWindow", u"\u8fd0\u884c\u6b21\u6570", None))

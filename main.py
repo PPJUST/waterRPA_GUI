@@ -1,10 +1,9 @@
 from module.function_general import *
-from ui.widget_command_control import *
-from ui.widget_moved_list_widget import *
 from module.thread_run_commands import *
 from ui.ui_main import Ui_MainWindow
-from module.function_pynput import *
-from module.function_convert_listener import *
+from ui.widget_command_control import *
+from ui.widget_listener import *
+from ui.widget_moved_list_widget import *
 
 """
 行项目id data：1
@@ -82,7 +81,6 @@ class Main(QMainWindow):
 
     def get_args_signal(self, args_dict):
         """接收子控件传递的信号"""
-        print(f'接收信号 {args_dict}')
         id_widget = self.sender().property('id')
         self.command_dict[id_widget] = args_dict
         self.check_command_all_right()
@@ -399,27 +397,25 @@ class Main(QMainWindow):
         command_list = list(command_data_dict.values())
         function_config.save_command_config(config, command_list)
 
-
     """
     键鼠录制相关函数
     """
+
     def start_listener(self):
         """开始监听"""
         # 备忘录 - 监听事件做到qdialog+qthread中，实现前台+不卡ui
-        reply = QMessageBox.warning(self, "监听器", f"是否开始录制键鼠操作（ESC结束录制）", QMessageBox.Yes, QMessageBox.No)
+        reply = QMessageBox.warning(self, "监听器", f"是否开始录制键鼠操作", QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
-            self.listener_mouse, self.listener_keyboard = ListenerPynput().get_listener()
-            self.listener_mouse.start()
-            self.listener_keyboard.start()
-            self.listener_keyboard.join()
-            self.listener_keyboard.wait()
+            self.dialog = DialogListener()
+            self.dialog.signal_send_listener.connect(self.get_listener_data)
+            self.dialog.show()
 
-            command_listener = convert_to_ad()
-            print(command_listener)
-
-
-
+    def get_listener_data(self, listener_list):
+        """接收录制操作的数据，保存配置文件后重新读取更新ui"""
+        config = self.ui.comboBox_select_config.currentText()
+        function_config.save_command_config(config, listener_list)
+        self.load_config_command()
 
 
 def main():

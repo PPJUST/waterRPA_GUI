@@ -43,11 +43,11 @@ class ListenerPynput:
     def mouse_click(self, x, y, button, pressed):
         """鼠标点击事件"""
         if button == mouse.Button.left:
-            mouse_button = 'left'
+            mouse_button = '左键'
         elif button == mouse.Button.middle:
-            mouse_button = 'middle'
+            mouse_button = '中键'
         elif button == mouse.Button.right:
-            mouse_button = 'right'
+            mouse_button = '右键'
         else:
             mouse_button = None
 
@@ -65,9 +65,9 @@ class ListenerPynput:
     def mouse_scroll(self, x, y, dx, dy):
         """鼠标滚轮事件"""
         if dy > 0:
-            direction = 'up'
+            direction = '向上'
         else:
-            direction = 'down'
+            direction = '向下'
 
         event_data = self.event_data.copy()
         event_data['x'] = x

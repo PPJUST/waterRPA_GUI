@@ -153,7 +153,7 @@
          <item>
           <widget class="QLabel" name="label_2">
            <property name="text">
-            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1.全局设置-运行次数：为0时，为无限循环。&lt;/p&gt;&lt;p&gt;2.全局-指令间隔：每行指令执行的间隔时间。&lt;/p&gt;&lt;p&gt;3.全局-寻图超时时间：搜索指定图片时的超时时间，超过则终止。&lt;/p&gt;&lt;p&gt;4.鼠标移至屏幕最左上角时，可强制终止运行（运行等待指令时除外）。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;1.全局设置-运行次数：为0时，为无限循环。&lt;/p&gt;&lt;p&gt;2.全局设置-指令间隔：每行指令执行的间隔时间。&lt;/p&gt;&lt;p&gt;3.全局设置-寻图超时时间：搜索指定图片时的超时时间，超过则终止。&lt;/p&gt;&lt;p&gt;4.鼠标移至屏幕最左上角时，可强制终止运行（运行等待指令时除外）。&lt;/p&gt;&lt;p&gt;5.录制操作后，请注意全局设置-指令间隔。&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
           </widget>
          </item>
