@@ -71,8 +71,8 @@ default_message = ''  # 默认文本
 default_hotkey = ''  # 默认热键
 default_keys = ''  # 默认键
 default_key = ''  # 默认键
-default_x = 0  # 默认x轴坐标值
-default_y = 0  # 默认y轴坐标值
+default_x = 1  # 默认x轴坐标值
+default_y = 1  # 默认y轴坐标值
 default_confidence = 0.9  # 默认寻图精度
 default_area = (0, 0, 0, 0)  # 默认区域截图范围
 default_move_direction = '向左'  # 默认鼠标移动方向
@@ -100,6 +100,8 @@ default_args_dict = {
     'duration': default_duration,
     'screenshot_image_path': default_screenshot_image_path,
     'mode_find_image': default_mode_find_image,
+    'x': default_x,
+    'y': default_y,
     'other': ''
 }
 """args_dict参数说明
@@ -124,6 +126,8 @@ move_distance:int 鼠标移动距离：整数
 duration:float 移动耗时：两位浮点数
 screenshot_image_path:str 保存截图路径：字符串
 mode_find_image:str 寻图模式：字符串
+x:int x轴坐标：整数
+y:int y轴坐标：整数
 other:str 占位
 """
 
@@ -132,7 +136,8 @@ other:str 占位
 """
 command_chs_to_en_dict = {'': '',
                           '---鼠标---': '',
-                          '鼠标操作-移动': 'command_mouse_move',
+                          '鼠标操作-移动(相对)': 'command_mouse_move_relative',
+                          '鼠标操作-移动(绝对)': 'command_mouse_move_absolute',
                           '鼠标操作-点击': 'command_mouse_click',
                           '鼠标操作-按下(不释放)': 'command_mouse_press',
                           '鼠标操作-释放': 'command_mouse_release',
@@ -154,7 +159,8 @@ command_chs_to_en_dict = {'': '',
 # for key, value in command_chs_to_en.items():
 #     command_en_to_chs_dict[value] = key
 command_en_to_chs_dict = {'': '',
-                          'command_mouse_move': '鼠标操作-移动',
+                          'command_mouse_move_relative': '鼠标操作-移动(相对)',
+                          'command_mouse_move_absolute': '鼠标操作-移动(绝对)',
                           'command_mouse_click': '鼠标操作-点击',
                           'command_mouse_press': '鼠标操作-按下(不释放)',
                           'command_mouse_release': '鼠标操作-释放',

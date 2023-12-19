@@ -16,8 +16,10 @@ _default_clicks: int = 1  # 默认点击次数
 _default_interval: float = 0.1  # 默认每次点击间隔时间
 _default_presses: int = 1  # 默认重复次数
 _default_confidence = 0.9  # 默认寻图精度
-_move_direction = '向左'  # 默认移动方向
-_move_distance = 100  # 默认移动距离
+_default_move_direction = '向左'  # 默认移动方向
+_default_move_distance = 100  # 默认移动距离
+_default_X = 1  # 默认x坐标轴
+_default_Y = 1  # 默认y坐标轴
 _max_x, _max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大小）
 
 
@@ -65,8 +67,8 @@ class PyautoguiMouse:
         return x, y
 
     @staticmethod
-    def move_mouse(duration: float = _default_duration, move_direction: str = _move_direction,
-                   move_distance: int = _move_distance):
+    def move_mouse_relative(duration: float = _default_duration, move_direction: str = _default_move_direction,
+                            move_distance: int = _default_move_distance):
         """向指定方向移动鼠标"""
         x, y = pyautogui.position()
         if move_direction == '向左':
@@ -88,6 +90,14 @@ class PyautoguiMouse:
         if y > _max_x:
             y = _max_x
 
+        pyautogui.moveTo(x, y, duration=duration)
+
+        return x, y
+
+    @staticmethod
+    def move_mouse_absolute(duration: float = _default_duration, x: int = _default_X,
+                            y: int = _default_Y):
+        """移动鼠标至指定坐标轴"""
         pyautogui.moveTo(x, y, duration=duration)
 
         return x, y

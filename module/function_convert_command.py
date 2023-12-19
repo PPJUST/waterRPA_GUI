@@ -13,7 +13,8 @@ import ui.widget_command.command_key_in_keys as command_key_in_keys
 import ui.widget_command.command_key_press as command_key_press
 import ui.widget_command.command_key_release as command_key_release
 import ui.widget_command.command_mouse_click as command_mouse_click
-import ui.widget_command.command_mouse_move as command_mouse_move
+import ui.widget_command.command_mouse_move_relative as command_mouse_move_relative
+import ui.widget_command.command_mouse_move_absolute as command_mouse_move_absolute
 import ui.widget_command.command_mouse_press as command_mouse_press
 import ui.widget_command.command_mouse_release as command_mouse_release
 import ui.widget_command.command_mouse_scroll as command_mouse_scroll
@@ -74,14 +75,18 @@ class CommandConvert:
         duration = args_dict['duration']
         screenshot_image_path = args_dict['screenshot_image_path']
         mode_find_image = args_dict['mode_find_image']
+        x = args_dict['x']
+        y = args_dict['y']
         other = args_dict['other']
 
         scroll = scroll_distance if scroll_direction == '向上' else -scroll_distance
         timeout = function_config.get_config_find_image_timeout()
 
         function_object = None
-        if self.command_type_en == 'command_mouse_move':
-            function_object = functools.partial(PyautoguiMouse.move_mouse, duration, move_direction, move_distance)
+        if self.command_type_en == 'command_mouse_move_relative':
+            function_object = functools.partial(PyautoguiMouse.move_mouse_relative, duration, move_direction, move_distance)
+        if self.command_type_en == 'command_mouse_move_absolute':
+            function_object = functools.partial(PyautoguiMouse.move_mouse_absolute, duration, x, y)
         elif self.command_type_en == 'command_mouse_click':
             function_object = functools.partial(PyautoguiMouse.mouse_click, button, clicks, interval)
         elif self.command_type_en == 'command_mouse_press':

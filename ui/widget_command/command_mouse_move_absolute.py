@@ -4,7 +4,7 @@ from PySide6.QtWidgets import *
 from module.constant_default import *
 
 
-class CommandMouseMove(QWidget):
+class CommandMouseMoveAbsolute(QWidget):
     signal_args = Signal(dict)
 
     def __init__(self):
@@ -25,28 +25,28 @@ class CommandMouseMove(QWidget):
         self.horizontalLayout.addWidget(self.doubleSpinBox_duration)
 
         self.label_2 = QLabel()
-        self.label_2.setText('秒，')
+        self.label_2.setText('秒，移动至坐标轴 (X')
         self.horizontalLayout.addWidget(self.label_2)
 
-        self.comboBox_direction = QComboBox()
-        self.comboBox_direction.addItems(['向左', '向上', '向下', '向右'])
-        self.comboBox_direction.setCurrentText(default_move_direction)
-        self.horizontalLayout.addWidget(self.comboBox_direction)
+        self.spinBox_x = QSpinBox()
+        self.spinBox_x.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_x.setMaximum(max_x)
+        self.spinBox_x.setValue(default_x)
+        self.horizontalLayout.addWidget(self.spinBox_x)
 
         self.label_3 = QLabel()
-        self.label_3.setText('移动')
+        self.label_3.setText(', Y')
         self.horizontalLayout.addWidget(self.label_3)
 
-        self.spinBox_distance = QSpinBox()
-        self.spinBox_distance.setButtonSymbols(QAbstractSpinBox.NoButtons)
-        self.spinBox_distance.setMaximum(max_move_distance)
-        self.spinBox_distance.setSingleStep(50)
-        self.spinBox_distance.setValue(default_move_distance)
-        self.horizontalLayout.addWidget(self.spinBox_distance)
+        self.spinBox_y = QSpinBox()
+        self.spinBox_y.setButtonSymbols(QAbstractSpinBox.NoButtons)
+        self.spinBox_y.setMaximum(max_y)
+        self.spinBox_y.setValue(default_y)
+        self.horizontalLayout.addWidget(self.spinBox_y)
 
-        self.label_3 = QLabel()
-        self.label_3.setText('像素距离')
-        self.horizontalLayout.addWidget(self.label_3)
+        self.label_4 = QLabel()
+        self.label_4.setText(')')
+        self.horizontalLayout.addWidget(self.label_4)
 
         """
         初始化
@@ -59,18 +59,18 @@ class CommandMouseMove(QWidget):
         槽函数设置
         """
         self.doubleSpinBox_duration.valueChanged.connect(self.send_args)
-        self.comboBox_direction.currentTextChanged.connect(self.send_args)
-        self.spinBox_distance.valueChanged.connect(self.send_args)
+        self.spinBox_x.valueChanged.connect(self.send_args)
+        self.spinBox_y.valueChanged.connect(self.send_args)
 
     def load_args(self, args_dict):
         """加载参数设置"""
         self.args_dict = args_dict
         duration = args_dict['duration']
-        move_direction = args_dict['move_direction']
-        move_distance = args_dict['move_distance']
+        x = args_dict['x']
+        y = args_dict['y']
         self.doubleSpinBox_duration.setValue(duration)
-        self.comboBox_direction.setCurrentText(move_direction)
-        self.spinBox_distance.setValue(move_distance)
+        self.spinBox_x.setValue(x)
+        self.spinBox_y.setValue(y)
 
     def check_args(self):
         """检查参数规范"""
@@ -79,11 +79,11 @@ class CommandMouseMove(QWidget):
     def send_args(self):
         """发送参数设置"""
         duration = self.doubleSpinBox_duration.value()
-        move_direction = self.comboBox_direction.currentText()
-        move_distance = self.spinBox_distance.value()
+        x = self.spinBox_x.value()
+        y = self.spinBox_y.value()
         self.args_dict['duration'] = duration
-        self.args_dict['move_direction'] = move_direction
-        self.args_dict['move_distance'] = move_distance
+        self.args_dict['x'] = x
+        self.args_dict['y'] = y
 
         self.signal_args.emit(self.args_dict)
 
@@ -93,7 +93,7 @@ def _test_widget():
     app = QApplication([])
     window = QWidget()
     # --------------
-    test = CommandMouseMove()
+    test = CommandMouseMoveAbsolute()
     # -------------
     layout = QVBoxLayout()
     layout.addWidget(test)
