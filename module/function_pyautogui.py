@@ -71,13 +71,13 @@ class PyautoguiMouse:
                             move_distance: int = _default_move_distance):
         """向指定方向移动鼠标"""
         x, y = pyautogui.position()
-        if move_direction == '向左':
+        if move_direction in ['向左', 'left']:
             x -= move_distance
-        elif move_direction == '向右':
+        elif move_direction in ['向右', 'right']:
             x += move_distance
-        elif move_direction == '向上':
+        elif move_direction in ['向上', 'up']:
             y -= move_distance
-        elif move_direction == '向下':
+        elif move_direction in ['向下', 'down']:
             y += move_distance
 
         if x < 0:
@@ -274,10 +274,10 @@ class PyautoguiImage:
         timeout 超时时间"""
         all_center_position = PyautoguiImage._search_pic_all_position(pic_file, timeout=timeout)
         if all_center_position:
-            if find_model == '第一个':
+            if find_model in ['第一个', 'first']:
                 x, y = all_center_position[0]
                 PyautoguiMouse.move_mouse_to_position(x, y, duration=duration)
-            elif find_model == '全部':
+            elif find_model in ['全部', 'all']:
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
                     PyautoguiMouse.move_mouse_to_position(x, y, duration=duration)
@@ -299,11 +299,11 @@ class PyautoguiImage:
         timeout 超时时间"""
         all_center_position = PyautoguiImage._search_pic_all_position(pic_file, timeout=timeout)
         if all_center_position:
-            if find_model == '第一个':
+            if find_model in ['第一个', 'first']:
                 x, y = all_center_position[0]
                 PyautoguiMouse.move_mouse_to_position(x=x, y=y, duration=duration)
                 PyautoguiMouse.mouse_click(button=button, clicks=clicks, interval=interval)
-            elif find_model == '全部':
+            elif find_model in ['全部', 'all']:
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
                     PyautoguiMouse.move_mouse_to_position(x=x, y=y, duration=duration)

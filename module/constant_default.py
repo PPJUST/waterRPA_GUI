@@ -18,6 +18,11 @@ icon_del = r'icon/del.png'
 error_stylesheet_border = 'border: 1px solid red;'
 
 """
+录制键鼠相关
+"""
+listener_file = 'listener.pickle'  # 保存的文件名
+
+"""
 pyautogui支持的快捷键字典
 """
 pyautogui_keyboard_keys = ['\t', '\n', '\r', ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.',

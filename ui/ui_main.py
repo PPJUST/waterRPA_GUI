@@ -1,17 +1,24 @@
 # -*- coding: utf-8 -*-
 
 ################################################################################
-## Form generated from reading UI file 'ui_mainSsBYfV.ui'
+## Form generated from reading UI file 'ui_mainkSJsSR.ui'
 ##
-## Created by: Qt User Interface Compiler version 6.1.3
+## Created by: Qt User Interface Compiler version 6.5.3
 ##
 ## WARNING! All changes made in this file will be lost when recompiling UI file!
 ################################################################################
 
-from PySide6.QtCore import *  # type: ignore
-from PySide6.QtGui import *  # type: ignore
-from PySide6.QtWidgets import *  # type: ignore
-
+from PySide6.QtCore import (QCoreApplication, QDate, QDateTime, QLocale,
+    QMetaObject, QObject, QPoint, QRect,
+    QSize, QTime, QUrl, Qt)
+from PySide6.QtGui import (QBrush, QColor, QConicalGradient, QCursor,
+    QFont, QFontDatabase, QGradient, QIcon,
+    QImage, QKeySequence, QLinearGradient, QPainter,
+    QPalette, QPixmap, QRadialGradient, QTransform)
+from PySide6.QtWidgets import (QApplication, QComboBox, QDoubleSpinBox, QGridLayout,
+    QGroupBox, QHBoxLayout, QLabel, QMainWindow,
+    QMenuBar, QPushButton, QSizePolicy, QSpinBox,
+    QToolButton, QVBoxLayout, QWidget)
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -71,7 +78,12 @@ class Ui_MainWindow(object):
         self.pushButton_stop.setObjectName(u"pushButton_stop")
         self.pushButton_stop.setEnabled(False)
 
-        self.gridLayout.addWidget(self.pushButton_stop, 0, 1, 1, 1)
+        self.gridLayout.addWidget(self.pushButton_stop, 0, 2, 1, 1)
+
+        self.pushButton_listener = QPushButton(self.groupBox_function)
+        self.pushButton_listener.setObjectName(u"pushButton_listener")
+
+        self.gridLayout.addWidget(self.pushButton_listener, 0, 3, 1, 1)
 
 
         self.verticalLayout_4.addWidget(self.groupBox_function)
@@ -166,7 +178,7 @@ class Ui_MainWindow(object):
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QMenuBar(MainWindow)
         self.menubar.setObjectName(u"menubar")
-        self.menubar.setGeometry(QRect(0, 0, 877, 22))
+        self.menubar.setGeometry(QRect(0, 0, 877, 21))
         MainWindow.setMenuBar(self.menubar)
 
         self.retranslateUi(MainWindow)
@@ -183,6 +195,7 @@ class Ui_MainWindow(object):
         self.groupBox_function.setTitle(QCoreApplication.translate("MainWindow", u"\u6267\u884c\u533a", None))
         self.pushButton_start.setText(QCoreApplication.translate("MainWindow", u"\u6267\u884c", None))
         self.pushButton_stop.setText(QCoreApplication.translate("MainWindow", u"\u505c\u6b62", None))
+        self.pushButton_listener.setText(QCoreApplication.translate("MainWindow", u"\u5f55\u5236", None))
         self.groupBox_info.setTitle(QCoreApplication.translate("MainWindow", u"\u8bf4\u660e", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"<html><head/><body><p>1.\u5168\u5c40\u8bbe\u7f6e-\u8fd0\u884c\u6b21\u6570\uff1a\u4e3a0\u65f6\uff0c\u4e3a\u65e0\u9650\u5faa\u73af\u3002</p><p>2.\u5168\u5c40-\u6307\u4ee4\u95f4\u9694\uff1a\u6bcf\u884c\u6307\u4ee4\u6267\u884c\u7684\u95f4\u9694\u65f6\u95f4\u3002</p><p>3.\u5168\u5c40-\u5bfb\u56fe\u8d85\u65f6\u65f6\u95f4\uff1a\u641c\u7d22\u6307\u5b9a\u56fe\u7247\u65f6\u7684\u8d85\u65f6\u65f6\u95f4\uff0c\u8d85\u8fc7\u5219\u7ec8\u6b62\u3002</p><p>4.\u9f20\u6807\u79fb\u81f3\u5c4f\u5e55\u6700\u5de6\u4e0a\u89d2\u65f6\uff0c\u53ef\u5f3a\u5236\u7ec8\u6b62\u8fd0\u884c\uff08\u8fd0\u884c\u7b49\u5f85\u6307\u4ee4\u65f6\u9664\u5916\uff09\u3002</p></body></html>", None))
         self.groupBox_setting.setTitle(QCoreApplication.translate("MainWindow", u"\u5168\u5c40\u8bbe\u7f6e", None))
