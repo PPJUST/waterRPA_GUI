@@ -53,6 +53,7 @@ class Main(QMainWindow):
         self.command_dict = dict()  # 各个命令行的参数设置，格式为{命令行id:{args_dict数据},...}
         function_config.check_default_config()
         pyautogui.FAILSAFE = True  # 启用自动防故障功能，左上角的坐标为（0，0），将鼠标移到屏幕的左上角，来抛出failSafeException异常
+        pyautogui.PAUSE = 0  # pyautogui自带的延迟功能，默认延迟时间0.1秒，不使用该自带功能而使用time.sleep进行延迟时间的设置
         self.runs_times = 0  # 已运行次数，用于循环运行
         self.load_global_setting()  # 加载全局设置
 
@@ -62,6 +63,8 @@ class Main(QMainWindow):
         self.thread_run_command = ThreadRunCommands()
         self.thread_run_command.signal_succeed.connect(self.run_commands_succeed)
         self.thread_run_command.signal_failed.connect(self.run_commands_failed)
+        self.thread_run_command.signal_succeed.connect(self.scroll_to_item)
+        self.thread_run_command.signal_failed.connect(self.scroll_to_item)
         self.thread_run_command.signal_finished.connect(self.run_commands_finished)
         self.thread_run_command.signal_error.connect(self.run_commands_error)
 
@@ -153,6 +156,22 @@ class Main(QMainWindow):
     """
     接收多线程信号相关函数
     """
+    def scroll_to_item(self, id_run):
+        """滚动行项目到执行行"""
+        for i in range(self.listWidget_command_area.count()):
+            item = self.listWidget_command_area.item(i)
+            widget = self.listWidget_command_area.itemWidget(item)
+            id_widget = widget.property('id')
+
+            if id_widget == id_run:
+                try:
+                    scroll_to = self.listWidget_command_area.item(i+2)  # 滚动到下面第二行
+                    self.listWidget_command_area.scrollToItem(scroll_to)
+                    break
+                except:
+                    break
+
+
 
     def run_commands_succeed(self, id_succeed):
         """修改成功运行的行项目图标"""

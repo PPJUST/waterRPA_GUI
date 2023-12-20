@@ -41,6 +41,7 @@ class ThreadRunCommands(QThread):
                 result_code = False
                 break
 
-            time.sleep(self.wait_time)
+            if self.wait_time:
+                time.sleep(self.wait_time)
 
         self.signal_finished.emit(result_code)
