@@ -53,6 +53,8 @@ class PyautoguiMouse:
     def move_mouse_to_position(x: int, y: int, duration: float = _default_duration):
         """移动鼠标至指定坐标轴
         duration 为移动所需时间，0为瞬间移动"""
+        if x == 0 and y == 0:
+            x, y = 1, 1
         pyautogui.moveTo(x, y, duration=duration)
 
         return x, y
@@ -62,6 +64,8 @@ class PyautoguiMouse:
         """按下鼠标键，拖拽至指定坐标轴
         button 为指定键，可设置为"left", "middle", right"
         duration 为移动所需时间，0为瞬间移动"""
+        if x == 0 and y == 0:
+            x, y = 1, 1
         pyautogui.dragTo(x, y, button=button, duration=duration)
 
         return x, y
@@ -90,6 +94,8 @@ class PyautoguiMouse:
         if y > _max_x:
             y = _max_x
 
+        if x == 0 and y == 0:
+            x, y = 1, 1
         pyautogui.moveTo(x, y, duration=duration)
 
         return x, y
@@ -98,6 +104,8 @@ class PyautoguiMouse:
     def move_mouse_absolute(duration: float = _default_duration, x: int = _default_X,
                             y: int = _default_Y):
         """移动鼠标至指定坐标轴"""
+        if x == 0 and y == 0:
+            x, y = 1, 1
         pyautogui.moveTo(x, y, duration=duration)
 
         return x, y

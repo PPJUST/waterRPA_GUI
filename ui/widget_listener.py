@@ -17,13 +17,12 @@ class DialogListener(QDialog):
         self.layout = QVBoxLayout()
 
         self.label = QLabel()
-        self.label.setText('开始录制，按ESC结束录制')
+        self.label.setText('开始录制，按ESC结束录制(结束后写入数据时会卡顿一段时间)')
         self.layout.addWidget(self.label)
 
         self.setLayout(self.layout)
 
-        self.setWindowFlags(
-            self.windowFlags() & ~Qt.WindowTitleHint & ~Qt.WindowSystemMenuHint & ~Qt.WindowCloseButtonHint)
+        self.setWindowFlags(self.windowFlags() | Qt.FramelessWindowHint)  # 设置无边框
 
         """子线程设置"""
         self.thread = ThreadListener()

@@ -87,10 +87,12 @@ class Main(QMainWindow):
         id_widget = self.sender().property('id')
         self.command_dict[id_widget] = args_dict
         self.check_command_all_right()
-        self.save_command_setting()  # 每次更新保存配置
+        # self.save_command_setting()  # 每次更新保存配置
 
     def run_commands(self):
         """执行指令"""
+        # 执行前保存配置文件
+        self.save_command_setting()
         # 重置图标
         self.reset_state_icon()
         # 禁用控件
@@ -437,7 +439,7 @@ class Main(QMainWindow):
 
 
 def main():
-    app = QApplication([])
+    app = QApplication()
     app.setStyle('Fusion')
     show_ui = Main()
     show_ui.setWindowIcon(QIcon('./icon/main.ico'))
