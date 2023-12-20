@@ -156,6 +156,7 @@ class Main(QMainWindow):
     """
     接收多线程信号相关函数
     """
+
     def scroll_to_item(self, id_run):
         """滚动行项目到执行行"""
         for i in range(self.listWidget_command_area.count()):
@@ -165,13 +166,11 @@ class Main(QMainWindow):
 
             if id_widget == id_run:
                 try:
-                    scroll_to = self.listWidget_command_area.item(i+2)  # 滚动到下面第二行
+                    scroll_to = self.listWidget_command_area.item(i + 2)  # 滚动到下面第二行
                     self.listWidget_command_area.scrollToItem(scroll_to)
                     break
                 except:
                     break
-
-
 
     def run_commands_succeed(self, id_succeed):
         """修改成功运行的行项目图标"""

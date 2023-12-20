@@ -46,15 +46,81 @@ pynput_key_convert = {keyboard.Key.alt: 'alt', keyboard.Key.alt_l: 'altleft', ke
                       keyboard.Key.insert: 'insert', keyboard.Key.menu: None,
                       keyboard.Key.num_lock: 'numlock', keyboard.Key.pause: 'pause',
                       keyboard.Key.print_screen: 'printscreen', keyboard.Key.scroll_lock: 'scrolllock',
-                      '0': '96', '1': '97', '2': '98', '3': '99', '4': '100', '5': '101', '6': '102', '7': '103',
-                      '8': '104', '9': '105',
+                      '96': '0', '97': '1', '98': '2', '99': '3', '100': '4', '101': '5', '102': '6', '103': '7',
+                      '104': '8', '105': '9',
                       }
+
+pynput_keycode_convert = {
+    r"'\x01'": ['ctrl', 'a'],
+    r"'\x02'": ['ctrl', 'b'],
+    r"'\x03'": ['ctrl', 'c'],
+    r"'\x04'": ['ctrl', 'd'],
+    r"'\x05'": ['ctrl', 'e'],
+    r"'\x06'": ['ctrl', 'f'],
+    r"'\x07'": ['ctrl', 'g'],
+    r"'\x08'": ['ctrl', 'h'],
+    r"'\t'": ['ctrl', 'i'],
+    r"'\n'": ['ctrl', 'j'],
+    r"'\x0b'": ['ctrl', 'k'],
+    r"'\x0c'": ['ctrl', 'l'],
+    r"'\r'": ['ctrl', 'm'],
+    r"'\x0e'": ['ctrl', 'n'],
+    r"'\x0f'": ['ctrl', 'o'],
+    r"'\x10'": ['ctrl', 'p'],
+    r"'\x11'": ['ctrl', 'q'],
+    r"'\x12'": ['ctrl', 'r'],
+    r"'\x13'": ['ctrl', 's'],
+    r"'\x14'": ['ctrl', 't'],
+    r"'\x15'": ['ctrl', 'u'],
+    r"'\x16'": ['ctrl', 'v'],
+    r"'\x17'": ['ctrl', 'w'],
+    r"'\x18'": ['ctrl', 'x'],
+    r"'\x19'": ['ctrl', 'y'],
+    r"'\x1a'": ['ctrl', 'z'],
+    r"'\x1f'": ['ctrl', 'shift', '-'],
+    r"<186>": ['ctrl', ';'],
+    r"<187>": ['ctrl', '='],
+    r"<189>": ['ctrl', '-'],
+    r"<192>": ['ctrl', '`'],
+    r"<222>": ['ctrl', r"'"],
+    r"<48>": ['ctrl', '0'],
+    r"<49>": ['ctrl', '1'],
+    r"<50>": ['ctrl', '2'],
+    r"<51>": ['ctrl', '3'],
+    r"<52>": ['ctrl', '4'],
+    r"<53>": ['ctrl', '5'],
+    r"<54>": ['ctrl', '6'],
+    r"<55>": ['ctrl', '7'],
+    r"<56>": ['ctrl', '8'],
+    r"<57>": ['ctrl', '9'],
+    r"'~'": ['shift', '`'],
+    r"'!'": ['shift', '1'],
+    r"'@'": ['shift', '2'],
+    r"'#'": ['shift', '3'],
+    r"'$'": ['shift', '4'],
+    r"'%'": ['shift', '5'],
+    r"'^'": ['shift', '6'],
+    r"'*'": ['shift', '7'],
+    r"'('": ['shift', '8'],
+    r"')'": ['shift', '9'],
+    r"'_'": ['shift', '-'],
+    r"'+'": ['shift', '='],
+    r"':'": ['shift', ';'],
+    r"'\"'": ['shift', "'"],
+    r"'<'": ['shift', ","],
+    r"'{'": ['shift', "["],
+    r"'}'": ['shift', "]"],
+    r"'|'": ['shift', "\\"],
+    r"'?'": ['shift', "/"],
+}
 
 
 def convert_pynput_key(key):
     """转换pynput的键为一般键"""
     if key in pynput_key_convert:
         return pynput_key_convert[key]
+    elif str(key) in pynput_keycode_convert:
+        return pynput_keycode_convert[str(key)]
     else:
         return key
 
@@ -84,7 +150,7 @@ def convert_to_ad():
         x = int(event_args['x'])
         y = int(event_args['y'])
         button = event_args['button']
-        direction = event_args['direction']
+        scroll_direction = event_args['scroll_direction']
         key = event_args['key']
 
         if event_type == 'mouse_press':  # 拆分为移动+按下
@@ -124,11 +190,7 @@ def convert_to_ad():
             # 滚轮
             command_scroll = default_args_dict.copy()
             command_scroll['command_type'] = 'command_mouse_scroll'
-            if direction == 'up':  # 两个库滚轮操作不同，滚动距离暂定50像素
-                distance = 50
-            else:
-                distance = -50
-            command_scroll['distance'] = distance
+            command_scroll['scroll_direction'] = scroll_direction
             command_data.append(command_scroll)
         elif event_type == 'keyboard_press':  # 等待时间+键盘按下
             # 等待
@@ -137,10 +199,13 @@ def convert_to_ad():
             command_wait['wait_time'] = time_difference
             command_data.append(command_wait)
             # 按下
-            command_press = default_args_dict.copy()
-            command_press['command_type'] = 'command_key_press'
-            command_press['key'] = convert_pynput_key(key)
-            command_data.append(command_press)
+            key_convert = convert_pynput_key(key)
+            key_list = key_convert if type(key_convert) is list else [key_convert]
+            for one_key in key_list:
+                command_press = default_args_dict.copy()
+                command_press['command_type'] = 'command_key_press'
+                command_press['key'] = convert_pynput_key(one_key)
+                command_data.append(command_press)
         elif event_type == 'keyboard_release':  # 等待时间+键盘释放
             # 等待
             command_wait = default_args_dict.copy()
@@ -148,9 +213,22 @@ def convert_to_ad():
             command_wait['wait_time'] = time_difference
             command_data.append(command_wait)
             # 释放
-            command_release = default_args_dict.copy()
-            command_release['command_type'] = 'command_key_release'
-            command_release['key'] = convert_pynput_key(key)
-            command_data.append(command_release)
+            key_convert = convert_pynput_key(key)
+            key_list = key_convert if type(key_convert) is list else [key_convert]
+            for one_key in key_list:
+                command_press = default_args_dict.copy()
+                command_press['command_type'] = 'command_key_release'
+                command_press['key'] = convert_pynput_key(one_key)
+                command_data.append(command_press)
 
     return command_data
+
+
+def test():
+    data = convert_to_ad()
+    for i in data:
+        print(i)
+
+
+if __name__ == '__main__':
+    test()

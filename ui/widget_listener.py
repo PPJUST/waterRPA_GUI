@@ -31,6 +31,7 @@ class DialogListener(QDialog):
         self.thread.start()
 
     def get_signal(self, command_listener):
+        self.label.setText('完成录制，等待程序写入配置文件')
         self.signal_send_listener.emit(command_listener)
         self.reject()
 

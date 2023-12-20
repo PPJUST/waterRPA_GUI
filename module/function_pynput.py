@@ -13,14 +13,14 @@ class ListenerPynput:
 
     def __init__(self):
         self.event_dict = []  # 存储事件，格式[本地时间,事件类型,事件参数{event_data}),...]
-        self.event_data = {'x': 1, 'y': 1, 'button': None, 'direction': None, 'key': None}
+        self.event_data = {'x': 1, 'y': 1, 'button': '左键', 'scroll_direction': '向上', 'key': ''}
 
         self.mouse_listener = mouse.Listener(on_move=None,
                                              on_click=self.mouse_click,
                                              on_scroll=self.mouse_scroll)
 
         self.keyboard_listener = keyboard.Listener(on_press=self.keyboard_press,
-                                                   on_release=self.keyboard_release)
+                                                   on_release=self.keyboard_release, )
 
     def listener_event(self, event_type, event_data):
         """存储事件数据"""
@@ -72,7 +72,7 @@ class ListenerPynput:
         event_data = self.event_data.copy()
         event_data['x'] = x
         event_data['y'] = y
-        event_data['direction'] = direction
+        event_data['scroll_direction'] = direction
         self.listener_event('mouse_scroll', event_data)
 
     def get_listener(self):
@@ -93,3 +93,14 @@ class ListenerPynput:
         event_data = self.event_data.copy()
         event_data['key'] = key
         self.listener_event('keyboard_release', event_data)
+
+
+def test():
+    t1, t2 = ListenerPynput().get_listener()
+    t1.start()
+    t2.start()
+    t2.join()
+
+
+if __name__ == '__main__':
+    test()
