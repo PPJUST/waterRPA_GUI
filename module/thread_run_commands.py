@@ -35,6 +35,7 @@ class ThreadRunCommands(QThread):
                         result_code = False
                         break
             except Exception as e:
+                # 备忘录 - 报错后释放已经按下的键
                 self.signal_failed.emit(item_id)
                 error_message = f'运行出错：{e}'
                 self.signal_error.emit(error_message)

@@ -423,7 +423,6 @@ class Main(QMainWindow):
 
     def start_listener(self):
         """开始监听"""
-        # 备忘录 - 监听事件做到qdialog+qthread中，实现前台+不卡ui
         reply = QMessageBox.warning(self, "监听器", f"是否开始录制键鼠操作", QMessageBox.Yes, QMessageBox.No)
 
         if reply == QMessageBox.Yes:
