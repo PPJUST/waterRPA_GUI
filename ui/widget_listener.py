@@ -4,7 +4,7 @@ import time
 from PySide6.QtCore import *
 from PySide6.QtWidgets import *
 
-from module.function_convert_listener import convert_to_ad
+from module.function_convert_listener import convert_to_pyautogui
 from module.function_pynput import ListenerPynput
 
 
@@ -50,5 +50,5 @@ class ThreadListener(QThread):
 
         self.listener_keyboard.stop()
         self.listener_mouse.stop()
-        command_listener = convert_to_ad()
+        command_listener = convert_to_pyautogui()
         self.signal_finished.emit(command_listener)

@@ -7,16 +7,18 @@ from pynput import keyboard
 from module.constant_default import default_args_dict, listener_file
 
 """
-2023.12.10：
+2023.12.20：
 1.转换说明：
 暂时只转换录制的关键点操作（鼠标点击，鼠标滚轮，键盘点击），不转换鼠标的移动操作（只会做两点间的直线移动）
 2.事件说明：
 mouse_press 转换为 鼠标移动+按下
 mouse_release 转换为 鼠标移动+释放
 mouse_scroll 转换为 鼠标移动+滚轮滚动
+0.2秒内连续的鼠标按下释放操作替换为点击操作
 
 keyboard_press 转换为 键盘按下
 keyboard_release 转换为 键盘释放
+连续的键盘操作不进行替换
 
 不同关键点之间的间隔用wait替代
 """
@@ -125,23 +127,89 @@ def convert_pynput_key(key):
         return key
 
 
+def convert_mouse_event(event_list: list):
+    """处理鼠标事件"""
+
+    def convert_mouse_pr_to_click(event_list_1: list):
+        """连续的鼠标按下释放操作替换为点击操作"""
+        event_list_checked = event_list_1.copy()
+        for index, event in enumerate(event_list_1):
+            time_local = event[0]
+            event_type = event[1]
+            event_args = event[2]
+
+            if event_type == 'mouse_release':
+                evnet_button = event_args['button']
+
+                last_time_local = event_list_1[index - 1][0]
+                last_event_type = event_list_1[index - 1][1]
+                last_event_args = event_list_1[index - 1][2]
+                last_evnet_button = last_event_args['button']
+
+                time_difference = time_local - last_time_local
+
+                if last_event_type == 'mouse_press' and evnet_button == last_evnet_button and time_difference < 0.2:
+                    event_list_checked[index][1] = 'mouse_click'
+                    event_list_checked[index][2]['clicks'] = 1
+                    event_list_checked[index - 1] = ''
+        # 剔除空值
+        event_list_checked_2 = [i for i in event_list_checked if i]
+
+        return event_list_checked_2
+
+    def convert_mouse_click_join(event_list_2: list):
+        """连续的鼠标点击释放操作替换为点击多次"""
+        for index, event in enumerate(event_list_2):
+            if index == 0:  # 跳过第一个
+                continue
+
+            time_local = event[0]
+            event_type = event[1]
+            event_args = event[2]
+
+            if event_type == 'mouse_click':
+                evnet_button = event_args['button']
+                evnet_clicks = event_args['clicks'] if 'clicks' in event_args else 1
+
+                last_time_local = event_list_2[index - 1][0]
+                last_event_type = event_list_2[index - 1][1]
+                last_event_args = event_list_2[index - 1][2]
+                last_evnet_button = last_event_args['button']
+                last_evnet_clicks = last_event_args['clicks'] if 'clicks' in last_event_args else 1
+
+                time_difference = time_local - last_time_local
+
+                if last_event_type == 'mouse_click' and evnet_button == last_evnet_button and time_difference < 0.2:
+                    event_list_2[index][2]['clicks'] = evnet_clicks + last_evnet_clicks
+                    event_list_2.pop(index - 1)
+                    return convert_mouse_click_join(event_list_2)
+
+        return event_list_2
+
+    check_1 = convert_mouse_pr_to_click(event_list)
+    check_2 = convert_mouse_click_join(check_1)
+
+    return check_2
+
+
 def get_original_data():
     """获取原始数据"""
     with open(listener_file, 'rb') as file:
-        data_dict = pickle.load(file)
+        data_list = pickle.load(file)
 
-    return data_dict
+    return convert_mouse_event(data_list)
 
 
-def convert_to_ad():
+def convert_to_pyautogui():
     """转换为args_dict格式"""
     command_data = []  # [{args_dict}, ...]
-    data = get_original_data()
+    event_list = get_original_data()
+    event_list_checked = convert_mouse_event(event_list)
     last_time = 0
-    for d_list in data:
-        time_local = d_list[0]
-        event_type = d_list[1]
-        event_args = d_list[2]
+    for event in event_list_checked:
+        time_local = event[0]
+        event_type = event[1]
+        event_args = event[2]
         # 提取数据
         time_difference = round(time_local - last_time, 2)
         if time_difference > 10000:  # 处理第一个时间差值
@@ -179,6 +247,20 @@ def convert_to_ad():
             command_release['command_type'] = 'command_mouse_release'
             command_release['button'] = button
             command_data.append(command_release)
+        elif event_type == 'mouse_click':  # 拆分为移动+点击
+            # 移动
+            command_move = default_args_dict.copy()
+            command_move['command_type'] = 'command_mouse_move_absolute'
+            command_move['x'] = x
+            command_move['y'] = y
+            command_move['duration'] = time_difference
+            command_data.append(command_move)
+            # 点击
+            command_click = default_args_dict.copy()
+            command_click['command_type'] = 'command_mouse_click'
+            command_click['button'] = button
+            command_click['clicks'] = event_args['clicks']
+            command_data.append(command_click)
         elif event_type == 'mouse_scroll':  # 拆分为鼠标移动+滚轮滚动
             # 移动
             command_move = default_args_dict.copy()
@@ -225,7 +307,7 @@ def convert_to_ad():
 
 
 def test():
-    data = convert_to_ad()
+    data = get_original_data()
     for i in data:
         print(i)
 

@@ -12,7 +12,7 @@ class ListenerPynput:
     """鼠标事件监听器"""
 
     def __init__(self):
-        self.event_dict = []  # 存储事件，格式[本地时间,事件类型,事件参数{event_data}),...]
+        self.event_list = []  # 存储事件，格式[[本地时间,事件类型,事件参数{event_data}],...]
         self.event_data = {'x': 1, 'y': 1, 'button': '左键', 'scroll_direction': '向上', 'key': ''}
 
         self.mouse_listener = mouse.Listener(on_move=None,
@@ -25,12 +25,12 @@ class ListenerPynput:
     def listener_event(self, event_type, event_data):
         """存储事件数据"""
         event_time = time.time()
-        self.event_dict.append((event_time, event_type, event_data))
+        self.event_list.append([event_time, event_type, event_data])
 
     def save_to_local(self):
         """保存事件数据至本地，用于主线程与子线程之间的连接"""
         with open("listener.pickle", "wb") as file:
-            pickle.dump(self.event_dict, file)
+            pickle.dump(self.event_list, file)
 
     def mouse_move_position(self, x, y):
         """鼠标移动事件"""

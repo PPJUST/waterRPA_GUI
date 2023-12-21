@@ -327,6 +327,9 @@ class PyautoguiCustom:
     @staticmethod
     def wait_time(wait_time: float):
         """等待指定时间，传入float"""
+        if wait_time == 0:
+            wait_time = 0.01
+
         time.sleep(wait_time)
 
         return wait_time
@@ -334,6 +337,10 @@ class PyautoguiCustom:
     @staticmethod
     def wait_time_random(wait_time_min: int, wait_time_max: int):
         wait_time_random = round(random.uniform(wait_time_min, wait_time_max), 2)
+
+        if wait_time_random == 0:
+            wait_time_random = 0.01
+
         time.sleep(wait_time_random)
 
         return wait_time_random
