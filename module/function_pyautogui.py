@@ -6,7 +6,7 @@ from typing import Tuple, Union
 import numpy
 import pyautogui
 import pyperclip
-from cv2 import imdecode
+from PIL import Image
 
 """
 参数默认设置
@@ -25,7 +25,7 @@ _max_x, _max_y = pyautogui.size()  # x,y坐标值的最大值限制（屏幕大�
 
 def image_read_from_chinese_path(image_file_name):
     # 将路径对应的图片转换为numpy图片对象（pyautogui库不支持中文名图片，需要通过numpy库中转）
-    image_numpy_data = imdecode(numpy.fromfile(image_file_name, dtype=numpy.uint8), -1)
+    image_numpy_data = numpy.array(Image.open(image_file_name))
 
     return image_numpy_data
 
@@ -284,11 +284,11 @@ class PyautoguiImage:
         if all_center_position:
             if find_model in ['第一个', 'first']:
                 x, y = all_center_position[0]
-                PyautoguiMouse.move_mouse_to_position(x, y, duration=duration)
+                PyautoguiMouse.move_mouse_to_position(x=x, y=y, duration=duration)
             elif find_model in ['全部', 'all']:
                 for i in range(len(all_center_position)):
                     x, y = all_center_position[i]
-                    PyautoguiMouse.move_mouse_to_position(x, y, duration=duration)
+                    PyautoguiMouse.move_mouse_to_position(x=x, y=y, duration=duration)
             return True
         else:
             return False

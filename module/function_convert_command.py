@@ -107,7 +107,7 @@ class CommandConvert:
             function_object = functools.partial(PyautoguiKeyboard.press_up_key, key)
         elif self.command_type_en == 'command_screenshot_fullscreen':
             function_object = functools.partial(PyautoguiImage.screenshot_fullscreen, screenshot_image_path)
-        elif self.command_type_en == 'command_move_to_pic_position':
+        elif self.command_type_en == 'command_move_to_image_position':
             function_object = functools.partial(PyautoguiImage.move_to_pic_position, screenshot_image_path, duration,
                                                 mode_find_image, timeout)
         elif self.command_type_en == 'command_click_image_position':
